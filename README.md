@@ -120,6 +120,20 @@ Includes `bloc_test` coverage for `AuthBloc` (login success/failure) and
 
 ---
 
+## 🖼 Logo & app icon
+
+- The brand logo lives at `assets/images/logo.png` and is shown in-app via the
+  `BrandLogo` widget (splash & login).
+- The launcher-icon source is `assets/icon/icon.png`. After `flutter create .`,
+  generate the platform icons with:
+
+  ```bash
+  dart run flutter_launcher_icons
+  ```
+
+  This writes the icons into `android/`, `ios/`, `web/` and `windows/`.
+  To use your own artwork, just replace those two PNGs and re-run the command.
+
 ## 🎨 Design system
 
 - **Font:** Plus Jakarta Sans (via `google_fonts`).
