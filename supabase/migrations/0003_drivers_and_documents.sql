@@ -110,6 +110,18 @@ create policy "drivers_update_admin"
   using (public.is_admin())
   with check (public.is_admin());
 
+-- Now that drivers exists, allow anyone authenticated to read the profile rows
+-- of approved drivers (so passengers can see a driver's name & photo).
+create policy "profiles_select_approved_drivers"
+  on public.profiles for select
+  using (
+    exists (
+      select 1 from public.drivers d
+      where d.profile_id = profiles.id
+        and d.approval_status = 'approved'
+    )
+  );
+
 
 -- ============================================================================
 -- driver_documents

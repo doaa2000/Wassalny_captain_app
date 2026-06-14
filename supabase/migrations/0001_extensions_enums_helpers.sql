@@ -75,31 +75,5 @@ begin
 end;
 $$;
 
--- ----------------------------------------------------------------------------
--- Helper: is the current JWT user an admin?
--- SECURITY DEFINER + table-owner context avoids RLS recursion when this is
--- used inside the profiles policies. STABLE so the planner can cache it.
--- ----------------------------------------------------------------------------
-create or replace function public.is_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.profiles
-    where id = auth.uid() and role = 'admin'
-  );
-$$;
-
--- Helper: role of the current user (or null when unauthenticated).
-create or replace function public.current_user_role()
-returns public.user_role
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select role from public.profiles where id = auth.uid();
-$$;
+-- NOTE: is_admin() and current_user_role() are defined in 0002 (after the
+-- profiles table exists), because their SQL bodies reference public.profiles.

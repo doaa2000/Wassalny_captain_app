@@ -21,6 +21,31 @@ comment on column public.profiles.role          is 'admin | passenger | driver.'
 comment on column public.profiles.phone         is 'E.164 phone, unique across the platform.';
 comment on column public.profiles.profile_image is 'Storage path/URL in the profile-images bucket.';
 
+-- Helper functions that depend on profiles (kept here so their SQL bodies
+-- validate against an existing table).
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
+
+create or replace function public.current_user_role()
+returns public.user_role
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select role from public.profiles where id = auth.uid();
+$$;
+
 -- Indexes ---------------------------------------------------------------------
 create index idx_profiles_role on public.profiles (role);
 
@@ -86,15 +111,8 @@ create policy "profiles_select_admin"
   on public.profiles for select
   using (public.is_admin());
 
-create policy "profiles_select_approved_drivers"
-  on public.profiles for select
-  using (
-    exists (
-      select 1 from public.drivers d
-      where d.profile_id = profiles.id
-        and d.approval_status = 'approved'
-    )
-  );
+-- NOTE: the "anyone can read approved-driver profiles" policy lives in 0003,
+-- after the drivers table exists (it references public.drivers).
 
 -- Insert: a user may only create their own profile row (the trigger does this
 -- automatically; this policy covers manual/edge inserts).
