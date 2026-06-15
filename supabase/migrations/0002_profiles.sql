@@ -87,7 +87,10 @@ security definer
 set search_path = public
 as $$
 begin
-  if new.role is distinct from old.role and not public.is_admin() then
+  -- Only restrict end-user (JWT) requests; a null auth.uid() means a trusted
+  -- server / SQL editor / service-role context (e.g. bootstrapping the first
+  -- admin), which is allowed to change roles.
+  if new.role is distinct from old.role and auth.uid() is not null and not public.is_admin() then
     raise exception 'Only admins can change a profile role';
   end if;
   return new;

@@ -259,7 +259,9 @@ end; $$;
 create or replace function public.guard_profile_role()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if new.role is distinct from old.role and not public.is_admin() then
+  -- Only restrict end-user (JWT) requests; null auth.uid() = trusted server /
+  -- SQL editor / service role, which may bootstrap the first admin.
+  if new.role is distinct from old.role and auth.uid() is not null and not public.is_admin() then
     raise exception 'Only admins can change a profile role';
   end if;
   return new;
@@ -268,7 +270,7 @@ end; $$;
 create or replace function public.guard_driver_columns()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if not public.is_admin() then
+  if auth.uid() is not null and not public.is_admin() then
     if new.approval_status is distinct from old.approval_status
        or new.rating is distinct from old.rating
        or new.total_ratings is distinct from old.total_ratings

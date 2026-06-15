@@ -62,7 +62,8 @@ security definer
 set search_path = public
 as $$
 begin
-  if not public.is_admin() then
+  -- Restrict only end-user (JWT) requests; null auth.uid() = trusted server.
+  if auth.uid() is not null and not public.is_admin() then
     if new.approval_status is distinct from old.approval_status
        or new.rating        is distinct from old.rating
        or new.total_ratings is distinct from old.total_ratings
