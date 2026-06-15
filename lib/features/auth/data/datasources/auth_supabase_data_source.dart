@@ -15,8 +15,11 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   @override
   Future<CaptainModel> login({required String phone, required String password}) async {
     try {
+      // Email-based auth: the `phone` argument carries the login identifier
+      // (the captain's email). Phone+password needs a paid SMS provider, so we
+      // use email until that's configured.
       final sb.AuthResponse res =
-          await _service.client.auth.signInWithPassword(phone: phone, password: password);
+          await _service.client.auth.signInWithPassword(email: phone, password: password);
       return _profileFor(res.user?.id);
     } on sb.AuthException catch (e) {
       throw AuthException(e.message);

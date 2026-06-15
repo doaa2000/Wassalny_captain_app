@@ -12,7 +12,6 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_listener.dart';
 import '../widgets/brand_logo.dart';
-import '../widgets/phone_field.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,19 +21,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _phone = TextEditingController(text: '106 884 2190');
-  final TextEditingController _password = TextEditingController(text: 'password');
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
 
   @override
   void dispose() {
-    _phone.dispose();
+    _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
   void _submit() {
+    // The `phone` field carries the login identifier; with email-based auth it
+    // holds the captain's email address.
     context.read<AuthBloc>().add(
-          AuthLoginSubmitted(phone: _phone.text, password: _password.text),
+          AuthLoginSubmitted(phone: _email.text.trim(), password: _password.text),
         );
   }
 
@@ -58,7 +59,13 @@ class _LoginPageState extends State<LoginPage> {
                   Text('Sign in to start driving.',
                       style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark)),
                   const SizedBox(height: 26),
-                  PhoneField(controller: _phone),
+                  AppTextField(
+                    label: 'Email',
+                    controller: _email,
+                    hintText: 'you@example.com',
+                    keyboardType: TextInputType.emailAddress,
+                    prefix: const Icon(Icons.mail_outline_rounded, size: 19, color: AppColors.textMutedDark),
+                  ),
                   const SizedBox(height: 16),
                   AppTextField(
                     label: 'Password',
