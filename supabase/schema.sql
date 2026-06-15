@@ -700,6 +700,20 @@ returns jsonb language sql stable security definer set search_path = public as $
 $$;
 grant execute on function public.captain_today_summary() to authenticated;
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 11. GRANTS — let the API roles (anon/authenticated) reach the objects.
+--     RLS still gates which ROWS each role can see; these are table-level
+--     privileges that Supabase sets by default (and that a `drop schema public`
+--     wipes, causing "permission denied for table ..." 403s).
+-- ─────────────────────────────────────────────────────────────────────────────
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables    in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all functions in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
 -- ============================================================================
 -- Done. Verify with:  select typname from pg_type where typname = 'vehicle_type';
 -- ============================================================================
