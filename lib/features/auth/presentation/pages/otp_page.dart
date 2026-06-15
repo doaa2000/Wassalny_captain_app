@@ -58,7 +58,7 @@ class _OtpPageState extends State<OtpPage> {
                       style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark, height: 1.5),
                       children: [
                         TextSpan(
-                          text: '${context.read<AuthBloc>().state.captain?.phone ?? "+20 $_phone"}',
+                          text: context.read<AuthBloc>().state.captain?.phone ?? '+20 $_phone',
                           style: AppTextStyles.bodyStrong.copyWith(color: context.colors.onSurface),
                         ),
                       ],

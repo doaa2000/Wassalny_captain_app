@@ -23,7 +23,7 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<Either<Failure, Unit>> requestWithdrawal() async {
     try {
       await _remote.requestWithdrawal();
-      return Right(unit);
+      return const Right(unit);
     } catch (_) {
       return const Left(ServerFailure());
     }

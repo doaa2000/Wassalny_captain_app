@@ -67,11 +67,11 @@ class NavigateToPickupView extends StatelessWidget {
                 PassengerTile(
                   request: request,
                   subtitle: '${request.passengerRating} · ${request.fare} · ${request.paymentMethod}',
-                  trailing: [
-                    const SizedBox(width: 8),
-                    const CircleActionButton(icon: Icons.call_rounded, filled: true),
-                    const SizedBox(width: 8),
-                    const CircleActionButton(icon: Icons.chat_bubble_outline_rounded),
+                  trailing: const [
+                    SizedBox(width: 8),
+                    CircleActionButton(icon: Icons.call_rounded, filled: true),
+                    SizedBox(width: 8),
+                    CircleActionButton(icon: Icons.chat_bubble_outline_rounded),
                   ],
                 ),
                 const SizedBox(height: 16),

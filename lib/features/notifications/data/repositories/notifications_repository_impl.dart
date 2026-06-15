@@ -23,7 +23,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   Future<Either<Failure, Unit>> clearAll() async {
     try {
       await _remote.clearAll();
-      return Right(unit);
+      return const Right(unit);
     } catch (_) {
       return const Left(ServerFailure());
     }
