@@ -22,11 +22,19 @@ abstract final class AppConstants {
       String.fromEnvironment('SUPABASE_ANON_KEY');
 
   // Supabase table names (kept here so the data layer has a single source).
-  static const String tableCaptains = 'captains';
-  static const String tableRequests = 'ride_requests';
+  // These match the deployed schema (see supabase/schema.sql).
+  static const String tableProfiles = 'profiles';
+  static const String tableDrivers = 'drivers';
   static const String tableTrips = 'trips';
-  static const String tableEarnings = 'earnings';
-  static const String tableTransactions = 'wallet_transactions';
+  static const String tableDriverLocations = 'driver_locations';
   static const String tableNotifications = 'notifications';
-  static const String tableVehicles = 'vehicles';
+  static const String tablePayments = 'payments';
+
+  // Trip status values (server-side enum public.trip_status).
+  static const String tripStatusRequested = 'requested';
+  static const String tripStatusAccepted = 'accepted';
+  static const String tripStatusArrived = 'arrived';
+  static const String tripStatusInProgress = 'in_progress';
+  static const String tripStatusCompleted = 'completed';
+  static const String tripStatusCancelled = 'cancelled';
 }

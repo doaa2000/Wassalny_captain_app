@@ -33,13 +33,11 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
     required String phone,
   }) async {
     try {
-      await _service.client.from(AppConstants.tableCaptains).insert({
-        'name': name,
-        'national_id': nationalId,
-        'license_number': licenseNumber,
-        'phone': phone,
-        'status': 'pending',
-      });
+      // Phone-based onboarding: send the OTP so the app can continue to the
+      // verification screen. The captain's profile is auto-created by the
+      // `handle_new_user` trigger on first sign-in; the driver/vehicle row and
+      // KYC documents are completed afterwards (admin reviews + approves).
+      await _service.client.auth.signInWithOtp(phone: phone);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -97,11 +95,21 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
 
   Future<CaptainModel> _profileFor(String? userId) async {
     if (userId == null) throw const AuthException('No active session.');
-    final Map<String, dynamic> row = await _service.client
-        .from(AppConstants.tableCaptains)
-        .select()
+    final Map<String, dynamic> profile = await _service.client
+        .from(AppConstants.tableProfiles)
+        .select('id, full_name, phone')
         .eq('id', userId)
         .single();
-    return CaptainModel.fromJson(row);
+    final Map<String, dynamic>? driver = await _service.client
+        .from(AppConstants.tableDrivers)
+        .select('rating')
+        .eq('profile_id', userId)
+        .maybeSingle();
+    return CaptainModel.fromJson({
+      'id': profile['id'],
+      'name': profile['full_name'],
+      'phone': profile['phone'],
+      'rating': driver?['rating']?.toString(),
+    });
   }
 }

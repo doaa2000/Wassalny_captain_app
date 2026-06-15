@@ -687,6 +687,19 @@ create policy "payments_select_admin" on public.payments for select using (publi
 drop policy if exists "payments_admin_write" on public.payments;
 create policy "payments_admin_write" on public.payments for all using (public.is_admin()) with check (public.is_admin());
 
+-- Per-driver "today" summary for the Captain app dashboard.
+create or replace function public.captain_today_summary()
+returns jsonb language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'today_earnings', 'EGP ' || coalesce((select round(sum(trip_price))::int from public.trips
+        where driver_id = auth.uid() and status = 'completed' and completed_at >= date_trunc('day', now())), 0)::text,
+    'trips_today', (select count(*) from public.trips
+        where driver_id = auth.uid() and status = 'completed' and completed_at >= date_trunc('day', now())),
+    'online_time', '—'
+  );
+$$;
+grant execute on function public.captain_today_summary() to authenticated;
+
 -- ============================================================================
 -- Done. Verify with:  select typname from pg_type where typname = 'vehicle_type';
 -- ============================================================================

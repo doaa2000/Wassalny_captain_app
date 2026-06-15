@@ -21,6 +21,11 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
+  Stream<List<RideRequest>> watchNearbyRequests() {
+    return _remote.watchNearbyRequests();
+  }
+
+  @override
   Future<Either<Failure, RideRequest>> acceptRequest(String requestId) {
     return _guard(() async => _remote.acceptRequest(requestId));
   }

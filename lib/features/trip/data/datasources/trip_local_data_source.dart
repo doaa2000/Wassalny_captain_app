@@ -45,6 +45,10 @@ class TripLocalDataSource implements TripRemoteDataSource {
   Future<List<RideRequestModel>> fetchNearbyRequests() async => _seed;
 
   @override
+  Stream<List<RideRequestModel>> watchNearbyRequests() =>
+      Stream<List<RideRequestModel>>.value(_seed);
+
+  @override
   Future<RideRequestModel> acceptRequest(String requestId) async {
     return _seed.firstWhere((r) => r.id == requestId, orElse: () => _seed.first);
   }

@@ -16,3 +16,12 @@ class DashboardStarted extends DashboardEvent {
 class DashboardOnlineToggled extends DashboardEvent {
   const DashboardOnlineToggled();
 }
+
+/// Internal: a new set of nearby requests arrived from the Realtime stream.
+class _DashboardRequestsUpdated extends DashboardEvent {
+  const _DashboardRequestsUpdated(this.requests);
+  final List<RideRequest> requests;
+
+  @override
+  List<Object?> get props => [requests];
+}

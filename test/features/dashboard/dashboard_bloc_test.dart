@@ -6,7 +6,9 @@ import 'package:wassalny_captain/core/errors/failures.dart';
 import 'package:wassalny_captain/features/dashboard/domain/usecases/get_dashboard_summary.dart';
 import 'package:wassalny_captain/features/dashboard/domain/usecases/set_online_status.dart';
 import 'package:wassalny_captain/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:wassalny_captain/features/trip/domain/entities/ride_request.dart';
 import 'package:wassalny_captain/features/trip/domain/usecases/get_nearby_requests.dart';
+import 'package:wassalny_captain/features/trip/domain/usecases/watch_nearby_requests.dart';
 
 class _MockGetSummary extends Mock implements GetDashboardSummary {}
 
@@ -14,19 +16,28 @@ class _MockSetOnline extends Mock implements SetOnlineStatus {}
 
 class _MockGetNearby extends Mock implements GetNearbyRequests {}
 
+class _MockWatchNearby extends Mock implements WatchNearbyRequests {}
+
 void main() {
   late _MockGetSummary getSummary;
   late _MockSetOnline setOnline;
   late _MockGetNearby getNearby;
+  late _MockWatchNearby watchNearby;
 
   setUp(() {
     getSummary = _MockGetSummary();
     setOnline = _MockSetOnline();
     getNearby = _MockGetNearby();
+    watchNearby = _MockWatchNearby();
+    when(() => watchNearby()).thenAnswer((_) => Stream<List<RideRequest>>.empty());
   });
 
-  DashboardBloc buildBloc() =>
-      DashboardBloc(getSummary: getSummary, setOnline: setOnline, getNearbyRequests: getNearby);
+  DashboardBloc buildBloc() => DashboardBloc(
+        getSummary: getSummary,
+        setOnline: setOnline,
+        getNearbyRequests: getNearby,
+        watchNearbyRequests: watchNearby,
+      );
 
   group('DashboardBloc.toggle', () {
     blocTest<DashboardBloc, DashboardState>(

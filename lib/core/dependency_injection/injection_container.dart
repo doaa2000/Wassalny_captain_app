@@ -51,6 +51,7 @@ import '../../features/trip/domain/repositories/trip_repository.dart';
 import '../../features/trip/domain/usecases/accept_request.dart';
 import '../../features/trip/domain/usecases/complete_trip.dart';
 import '../../features/trip/domain/usecases/get_nearby_requests.dart';
+import '../../features/trip/domain/usecases/watch_nearby_requests.dart';
 import '../../features/trip/presentation/bloc/trip_bloc.dart';
 import '../../features/vehicle/data/datasources/vehicle_remote_data_source.dart';
 import '../../features/vehicle/data/repositories/vehicle_repository_impl.dart';
@@ -122,6 +123,7 @@ void _registerTrip(bool useRemote) {
   );
   sl.registerLazySingleton<TripRepository>(() => TripRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetNearbyRequests(sl()));
+  sl.registerLazySingleton(() => WatchNearbyRequests(sl()));
   sl.registerLazySingleton(() => AcceptRequest(sl()));
   sl.registerLazySingleton(() => CompleteTrip(sl()));
   // Shared across the trip flow and dashboard, so it's a singleton.
@@ -138,7 +140,12 @@ void _registerDashboard(bool useRemote) {
   sl.registerLazySingleton(() => GetDashboardSummary(sl()));
   sl.registerLazySingleton(() => SetOnlineStatus(sl()));
   sl.registerFactory(
-    () => DashboardBloc(getSummary: sl(), setOnline: sl(), getNearbyRequests: sl()),
+    () => DashboardBloc(
+      getSummary: sl(),
+      setOnline: sl(),
+      getNearbyRequests: sl(),
+      watchNearbyRequests: sl(),
+    ),
   );
 }
 

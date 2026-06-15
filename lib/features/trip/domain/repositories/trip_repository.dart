@@ -10,6 +10,9 @@ abstract interface class TripRepository {
   /// Ride requests currently available near the captain.
   Future<Either<Failure, List<RideRequest>>> getNearbyRequests();
 
+  /// Live stream of available ride requests (Realtime broadcast dispatch).
+  Stream<List<RideRequest>> watchNearbyRequests();
+
   /// Accept a request and start heading to the pickup.
   Future<Either<Failure, RideRequest>> acceptRequest(String requestId);
 
