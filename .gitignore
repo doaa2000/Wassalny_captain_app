@@ -17,3 +17,6 @@ pubspec.lock
 # Env / secrets
 .env
 *.env
+
+# Local Supabase keys (do not commit)
+supabase.json
