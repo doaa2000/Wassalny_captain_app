@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -82,6 +83,19 @@ Future<void> configureDependencies() async {
   // Use the live backend only when credentials are configured; otherwise fall
   // back to in-memory data sources so the app is fully runnable for UI work.
   final bool useRemote = AppConstants.supabaseUrl.isNotEmpty;
+
+  // Loud startup banner so it's obvious whether the app is talking to Supabase.
+  debugPrint('======================================================');
+  if (useRemote) {
+    debugPrint('🟢 WASSALNY: LIVE mode — connected to Supabase');
+    debugPrint('   URL = ${AppConstants.supabaseUrl}');
+  } else {
+    debugPrint('🟡 WASSALNY: MOCK mode — NOT connected to Supabase.');
+    debugPrint('   Run with: flutter run \\');
+    debugPrint('     --dart-define=SUPABASE_URL=https://<ref>.supabase.co \\');
+    debugPrint('     --dart-define=SUPABASE_ANON_KEY=<anon-key>');
+  }
+  debugPrint('======================================================');
 
   _registerAuth(useRemote);
   _registerTrip(useRemote);
