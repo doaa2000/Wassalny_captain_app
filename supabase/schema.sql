@@ -270,6 +270,9 @@ end; $$;
 create or replace function public.guard_driver_columns()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
+  if current_setting('app.system_update', true) = '1' then
+    return new;  -- trusted system update (from a SECURITY DEFINER trigger)
+  end if;
   if auth.uid() is not null and not public.is_admin() then
     if new.approval_status is distinct from old.approval_status
        or new.rating is distinct from old.rating
@@ -309,7 +312,9 @@ begin
     insert into public.trip_status_history (trip_id, status, changed_by, note)
     values (new.id, new.status, auth.uid(), new.cancellation_reason);
     if new.status = 'completed' and new.driver_id is not null then
+      perform set_config('app.system_update', '1', true);
       update public.drivers set total_trips = total_trips + 1 where profile_id = new.driver_id;
+      perform set_config('app.system_update', '0', true);
     end if;
   end if;
   return new;
@@ -319,10 +324,12 @@ create or replace function public.recompute_driver_rating()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare v_driver uuid := coalesce(new.driver_id, old.driver_id);
 begin
+  perform set_config('app.system_update', '1', true);
   update public.drivers d
     set rating = coalesce((select round(avg(r.rating)::numeric,2) from public.ratings r where r.driver_id = v_driver), 0),
         total_ratings = (select count(*) from public.ratings r where r.driver_id = v_driver)
   where d.profile_id = v_driver;
+  perform set_config('app.system_update', '0', true);
   return null;
 end; $$;
 
