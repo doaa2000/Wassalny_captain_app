@@ -23,10 +23,22 @@ class TripFlowPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: BlocConsumer<TripBloc, TripState>(
-        listenWhen: (prev, curr) => prev.phase != curr.phase,
+        listenWhen: (prev, curr) =>
+            prev.phase != curr.phase || prev.status != curr.status,
         listener: (context, state) {
           if (state.phase == TripPhase.expired || state.phase == TripPhase.idle) {
             context.go(AppRoutes.dashboard);
+          }
+          // Surface accept/complete failures instead of silently doing nothing.
+          if (state.status == TripStatus.failure && state.errorMessage != null) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: AppColors.danger,
+                  content: Text(state.errorMessage!),
+                ),
+              );
           }
         },
         builder: (context, state) {
