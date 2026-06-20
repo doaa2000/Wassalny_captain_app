@@ -23,11 +23,12 @@ class TripSupabaseDataSource implements TripRemoteDataSource {
   @override
   Future<List<RideRequestModel>> fetchNearbyRequests() async {
     try {
+      // RLS returns open (unassigned) requests for online drivers AND any trip
+      // assigned directly to this driver — so we don't filter driver_id here.
       final List<Map<String, dynamic>> rows = await _service.client
           .from(AppConstants.tableTrips)
           .select(_openSelect)
           .eq('status', AppConstants.tripStatusRequested)
-          .isFilter('driver_id', null)
           .order('created_at', ascending: false);
       return rows.map(RideRequestModel.fromTripRow).toList();
     } catch (e) {
@@ -37,17 +38,14 @@ class TripSupabaseDataSource implements TripRemoteDataSource {
 
   @override
   Stream<List<RideRequestModel>> watchNearbyRequests() {
-    // Realtime stream of open requests. `.stream()` supports a single eq filter,
-    // so the "unassigned" check is applied client-side.
+    // Realtime stream of requested trips. RLS scopes rows to open (broadcast)
+    // requests + trips assigned to this driver, so no client-side filter.
     return _service.client
         .from(AppConstants.tableTrips)
         .stream(primaryKey: ['id'])
         .eq('status', AppConstants.tripStatusRequested)
         .order('created_at')
-        .map((rows) => rows
-            .where((r) => r['driver_id'] == null)
-            .map(RideRequestModel.fromTripRow)
-            .toList());
+        .map((rows) => rows.map(RideRequestModel.fromTripRow).toList());
   }
 
   @override

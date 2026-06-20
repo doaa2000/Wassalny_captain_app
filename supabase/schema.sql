@@ -645,7 +645,7 @@ begin
     raise exception 'Only approved drivers can accept trips' using errcode = 'insufficient_privilege';
   end if;
   update public.trips set driver_id = auth.uid(), status = 'accepted'
-  where id = p_trip_id and status = 'requested' and driver_id is null
+  where id = p_trip_id and status = 'requested' and (driver_id is null or driver_id = auth.uid())
   returning * into v_trip;
   if not found then raise exception 'Trip is no longer available' using errcode = 'check_violation'; end if;
   return v_trip;

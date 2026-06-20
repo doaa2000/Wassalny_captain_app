@@ -54,7 +54,7 @@ begin
 
   update public.trips
     set driver_id = auth.uid(), status = 'accepted'
-  where id = p_trip_id and status = 'requested' and driver_id is null
+  where id = p_trip_id and status = 'requested' and (driver_id is null or driver_id = auth.uid())
   returning * into v_trip;
 
   if not found then
