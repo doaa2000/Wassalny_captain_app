@@ -27,7 +27,7 @@ abstract final class AppConstants {
   static const String _fallbackSupabaseUrl =
       'https://ovagqwoipzjokueqqubs.supabase.co';
   static const String _fallbackSupabaseAnonKey =
-      ''; // <-- paste your Supabase anon key here
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92YWdxd29pcHpqb2t1ZXFxdWJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMDEyMjIsImV4cCI6MjA5Mzc3NzIyMn0.jFxgGa08gtzIZtKjrUGujrtVn5L7seMx3p5ixKQU_-0'; // <-- paste your Supabase anon key here
 
   static const String supabaseUrl =
       String.fromEnvironment('SUPABASE_URL', defaultValue: _fallbackSupabaseUrl);
