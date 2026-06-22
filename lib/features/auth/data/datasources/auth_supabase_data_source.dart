@@ -20,7 +20,12 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
       // use email until that's configured.
       final sb.AuthResponse res =
           await _service.client.auth.signInWithPassword(email: phone, password: password);
-      return _profileFor(res.user?.id);
+      return await _profileFor(res.user?.id, requireDriver: true);
+    } on CaptainRemovedException {
+      // Credentials were valid (a session was created) but the captain has no
+      // driver record — sign back out so no dangling session remains.
+      await _service.client.auth.signOut();
+      rethrow;
     } on sb.AuthException catch (e) {
       throw AuthException(e.message);
     } catch (e) {
@@ -129,7 +134,12 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
     }
   }
 
-  Future<CaptainModel> _profileFor(String? userId) async {
+  /// Builds the captain profile. When [requireDriver] is true (login), a missing
+  /// driver record means the captain was removed → throws so the app blocks
+  /// them. Registration (verifyOtp) keeps it false, since a brand-new captain
+  /// has no driver record yet.
+  Future<CaptainModel> _profileFor(String? userId,
+      {bool requireDriver = false}) async {
     if (userId == null) throw const AuthException('No active session.');
     final Map<String, dynamic> profile = await _service.client
         .from(AppConstants.tableProfiles)
@@ -141,6 +151,7 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
         .select('rating')
         .eq('profile_id', userId)
         .maybeSingle();
+    if (requireDriver && driver == null) throw const CaptainRemovedException();
     return CaptainModel.fromJson({
       'id': profile['id'],
       'name': profile['full_name'],
