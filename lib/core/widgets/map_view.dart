@@ -1,133 +1,118 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../theme/app_colors.dart';
+import 'map_style.dart';
 
 /// Visual states the map can be rendered in.
 enum MapVariant { idle, route, tracking }
 
-/// A stylized, dependency-free map backdrop.
-///
-/// In production this is the single seam where a real map SDK (Google Maps,
-/// Mapbox) would be dropped in — every screen already consumes [MapView] rather
-/// than a concrete map, so swapping it touches exactly one widget. For now it
-/// paints a believable city map so the UI is pixel-faithful to the design.
-class MapView extends StatelessWidget {
-  const MapView({super.key, this.variant = MapVariant.idle});
+/// A real Google Map (dark-styled to match the Captain app). For [route] and
+/// [tracking] it draws a pickup → drop-off polyline with markers. The public
+/// API is unchanged (`MapView({variant})`) so the trip screens keep working;
+/// real trip coordinates can be passed later via [pickup]/[dropoff].
+class MapView extends StatefulWidget {
+  const MapView({
+    super.key,
+    this.variant = MapVariant.idle,
+    this.pickup,
+    this.dropoff,
+  });
 
   final MapVariant variant;
+  final LatLng? pickup;
+  final LatLng? dropoff;
+
+  @override
+  State<MapView> createState() => _MapViewState();
+}
+
+class _MapViewState extends State<MapView> {
+  // Sample Cairo coordinates until live trip geometry is wired in.
+  static const LatLng _defaultPickup = LatLng(30.0444, 31.2357);
+  static const LatLng _defaultDropoff = LatLng(30.0626, 31.2497);
+  static const LatLng _cairoCenter = LatLng(30.0500, 31.2400);
+
+  GoogleMapController? _controller;
+
+  LatLng get _pickup => widget.pickup ?? _defaultPickup;
+  LatLng get _dropoff => widget.dropoff ?? _defaultDropoff;
+  bool get _showRoute => widget.variant != MapVariant.idle;
+
+  Set<Marker> _markers() {
+    if (!_showRoute) return const {};
+    return {
+      Marker(
+        markerId: const MarkerId('pickup'),
+        position: _pickup,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: const InfoWindow(title: 'Pickup'),
+      ),
+      Marker(
+        markerId: const MarkerId('dropoff'),
+        position: _dropoff,
+        infoWindow: const InfoWindow(title: 'Drop-off'),
+      ),
+    };
+  }
+
+  Set<Polyline> _polylines() {
+    if (!_showRoute) return const {};
+    return {
+      Polyline(
+        polylineId: const PolylineId('route'),
+        points: [_pickup, _dropoff],
+        color: AppColors.primary,
+        width: 5,
+        geodesic: true,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        jointType: JointType.round,
+      ),
+    };
+  }
+
+  CameraPosition get _initialCamera => _showRoute
+      ? CameraPosition(target: _pickup, zoom: 13.5)
+      : const CameraPosition(target: _cairoCenter, zoom: 13);
+
+  Future<void> _onMapCreated(GoogleMapController controller) async {
+    _controller = controller;
+    if (_showRoute) {
+      final bounds = LatLngBounds(
+        southwest: LatLng(
+          _pickup.latitude < _dropoff.latitude ? _pickup.latitude : _dropoff.latitude,
+          _pickup.longitude < _dropoff.longitude ? _pickup.longitude : _dropoff.longitude,
+        ),
+        northeast: LatLng(
+          _pickup.latitude > _dropoff.latitude ? _pickup.latitude : _dropoff.latitude,
+          _pickup.longitude > _dropoff.longitude ? _pickup.longitude : _dropoff.longitude,
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      await controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 64));
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        painter: _MapPainter(variant: variant),
-        size: Size.infinite,
-      ),
+    return GoogleMap(
+      initialCameraPosition: _initialCamera,
+      onMapCreated: _onMapCreated,
+      style: captainMapStyle,
+      markers: _markers(),
+      polylines: _polylines(),
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+      compassEnabled: false,
+      mapToolbarEnabled: false,
+      padding: const EdgeInsets.only(bottom: 180),
     );
   }
-}
-
-class _MapPainter extends CustomPainter {
-  _MapPainter({required this.variant});
-
-  final MapVariant variant;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Base (dark map tones matching the design).
-    final Paint base = Paint()..color = const Color(0xFF11181F);
-    canvas.drawRect(Offset.zero & size, base);
-
-    final double w = size.width;
-    final double h = size.height;
-    final math.Random rnd = math.Random(7);
-
-    // City blocks.
-    final Paint block = Paint()..color = const Color(0xFF1A242E);
-    for (int i = 0; i < 22; i++) {
-      final double bw = 40 + rnd.nextDouble() * 90;
-      final double bh = 40 + rnd.nextDouble() * 90;
-      final double x = rnd.nextDouble() * (w - bw);
-      final double y = rnd.nextDouble() * (h - bh);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(x, y, bw, bh), const Radius.circular(7)),
-        block,
-      );
-    }
-
-    // Roads.
-    final Paint road = Paint()
-      ..color = const Color(0xFF263340)
-      ..strokeWidth = 9
-      ..strokeCap = StrokeCap.round;
-    for (int i = 1; i < 5; i++) {
-      final double y = h * i / 5;
-      canvas.drawLine(Offset(-10, y - 20), Offset(w + 10, y + 10), road);
-    }
-    for (int i = 1; i < 4; i++) {
-      final double x = w * i / 4;
-      canvas.drawLine(Offset(x, -10), Offset(x + 18, h + 10), road);
-    }
-
-    if (variant == MapVariant.idle) {
-      _paintCaptainPulse(canvas, Offset(w / 2, h * 0.42));
-      return;
-    }
-
-    // Route line (pickup -> drop-off) for route/tracking variants.
-    final Offset pickup = Offset(w * 0.28, h * 0.66);
-    final Offset dropoff = Offset(w * 0.74, h * 0.30);
-    final Path route = Path()
-      ..moveTo(pickup.dx, pickup.dy)
-      ..cubicTo(w * 0.30, h * 0.45, w * 0.62, h * 0.52, dropoff.dx, dropoff.dy);
-
-    canvas.drawPath(
-      route,
-      Paint()
-        ..color = AppColors.primary.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 9
-        ..strokeCap = StrokeCap.round,
-    );
-    canvas.drawPath(
-      route,
-      Paint()
-        ..color = AppColors.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4
-        ..strokeCap = StrokeCap.round,
-    );
-
-    _paintMarker(canvas, pickup, AppColors.success, isSquare: false);
-    _paintMarker(canvas, dropoff, AppColors.primary, isSquare: true);
-
-    if (variant == MapVariant.tracking) {
-      _paintCaptainPulse(canvas, Offset.lerp(pickup, dropoff, 0.4)!);
-    }
-  }
-
-  void _paintMarker(Canvas canvas, Offset c, Color color, {required bool isSquare}) {
-    canvas.drawCircle(c, 11, Paint()..color = color.withValues(alpha: 0.25));
-    if (isSquare) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromCenter(center: c, width: 13, height: 13), const Radius.circular(3)),
-        Paint()..color = color,
-      );
-    } else {
-      canvas.drawCircle(c, 6.5, Paint()..color = color);
-    }
-    canvas.drawCircle(c, 3, Paint()..color = AppColors.white);
-  }
-
-  void _paintCaptainPulse(Canvas canvas, Offset c) {
-    canvas.drawCircle(c, 26, Paint()..color = AppColors.primary.withValues(alpha: 0.12));
-    canvas.drawCircle(c, 14, Paint()..color = AppColors.primary.withValues(alpha: 0.25));
-    canvas.drawCircle(c, 8, Paint()..color = AppColors.primary);
-    canvas.drawCircle(c, 3, Paint()..color = AppColors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MapPainter oldDelegate) => oldDelegate.variant != variant;
 }
