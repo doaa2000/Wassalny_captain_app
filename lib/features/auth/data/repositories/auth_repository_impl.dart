@@ -71,6 +71,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());
+    } on CaptainRemovedException catch (e) {
+      return Left(AccountRemovedFailure(e.message));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on NetworkException catch (e) {

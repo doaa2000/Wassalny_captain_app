@@ -97,10 +97,30 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
     final sb.User? user = _service.client.auth.currentUser;
     if (user == null) return null;
     try {
-      return await _profileFor(user.id);
+      final Map<String, dynamic>? profile = await _service.client
+          .from(AppConstants.tableProfiles)
+          .select('id, full_name, phone')
+          .eq('id', user.id)
+          .maybeSingle();
+      final Map<String, dynamic>? driver = await _service.client
+          .from(AppConstants.tableDrivers)
+          .select('rating')
+          .eq('profile_id', user.id)
+          .maybeSingle();
+      // The auth account is fine, but the driver record is gone → an admin
+      // removed this captain. Signal it so the app shows the removed screen.
+      if (driver == null) throw const CaptainRemovedException();
+      return CaptainModel.fromJson({
+        'id': user.id,
+        'name': profile?['full_name'],
+        'phone': profile?['phone'],
+        'rating': driver['rating']?.toString(),
+      });
+    } on CaptainRemovedException {
+      rethrow;
     } catch (_) {
-      // Valid session, but we couldn't load the profile right now — keep the
-      // captain signed in with what the session already gives us.
+      // Valid session, but we couldn't load the data right now (transient/RLS/
+      // offline) — keep the captain signed in with what the session gives us.
       return CaptainModel.fromJson({
         'id': user.id,
         'name': (user.userMetadata?['full_name'] as String?) ?? '',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/pages/account_removed_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
@@ -54,6 +55,7 @@ abstract final class AppRouter {
       GoRoute(path: AppRoutes.signup, builder: (_, __) => const SignupPage()),
       GoRoute(path: AppRoutes.otp, builder: (_, __) => const OtpPage()),
       GoRoute(path: AppRoutes.forgotPassword, builder: (_, __) => const ForgotPasswordPage()),
+      GoRoute(path: AppRoutes.accountRemoved, builder: (_, __) => const AccountRemovedPage()),
 
       // ---- Main tabs (persistent bottom nav) ----
       StatefulShellRoute.indexedStack(

@@ -42,6 +42,8 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         listener: (context, state) {
           if (state is SplashAuthenticated) {
             context.go(AppRoutes.dashboard);
+          } else if (state is SplashRemoved) {
+            context.go(AppRoutes.accountRemoved);
           } else if (state is SplashUnauthenticated) {
             context.go(AppRoutes.login);
           }

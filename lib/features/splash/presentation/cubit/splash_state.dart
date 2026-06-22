@@ -18,3 +18,8 @@ class SplashAuthenticated extends SplashState {
 class SplashUnauthenticated extends SplashState {
   const SplashUnauthenticated();
 }
+
+/// A valid session exists but the captain was removed by an admin.
+class SplashRemoved extends SplashState {
+  const SplashRemoved();
+}

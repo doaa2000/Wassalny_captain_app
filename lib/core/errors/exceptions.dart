@@ -20,3 +20,11 @@ class NetworkException implements Exception {
   const NetworkException([this.message = 'No internet connection']);
   final String message;
 }
+
+/// Thrown when a valid auth session exists but the captain's driver record is
+/// gone (e.g. an admin removed them) — they are no longer an active captain.
+class CaptainRemovedException implements Exception {
+  const CaptainRemovedException(
+      [this.message = 'This captain account is no longer active.']);
+  final String message;
+}

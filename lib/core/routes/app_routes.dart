@@ -9,6 +9,7 @@ abstract final class AppRoutes {
   static const String signup = '/signup';
   static const String otp = '/otp';
   static const String forgotPassword = '/forgot-password';
+  static const String accountRemoved = '/account-removed';
 
   // Main shell tabs
   static const String dashboard = '/dashboard';

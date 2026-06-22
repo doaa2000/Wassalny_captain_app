@@ -29,3 +29,10 @@ class CacheFailure extends Failure {
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
+
+/// The captain's account exists but is no longer an active driver (removed by
+/// an admin). The app routes to the "account removed" screen.
+class AccountRemovedFailure extends Failure {
+  const AccountRemovedFailure(
+      [super.message = 'This captain account is no longer active.']);
+}
