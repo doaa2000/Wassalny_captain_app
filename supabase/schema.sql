@@ -462,6 +462,8 @@ drop policy if exists "drivers_update_self" on public.drivers;
 create policy "drivers_update_self" on public.drivers for update using (profile_id = auth.uid()) with check (profile_id = auth.uid());
 drop policy if exists "drivers_update_admin" on public.drivers;
 create policy "drivers_update_admin" on public.drivers for update using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "drivers_delete_admin" on public.drivers;
+create policy "drivers_delete_admin" on public.drivers for delete using (public.is_admin());
 
 -- driver_documents
 drop policy if exists "driver_documents_owner_select" on public.driver_documents;
