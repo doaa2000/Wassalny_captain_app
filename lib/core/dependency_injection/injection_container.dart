@@ -82,7 +82,8 @@ Future<void> configureDependencies() async {
 
   // Use the live backend only when credentials are configured; otherwise fall
   // back to in-memory data sources so the app is fully runnable for UI work.
-  final bool useRemote = AppConstants.supabaseUrl.isNotEmpty;
+  final bool useRemote = AppConstants.supabaseUrl.isNotEmpty &&
+      AppConstants.supabaseAnonKey.isNotEmpty;
 
   // Loud startup banner so it's obvious whether the app is talking to Supabase.
   debugPrint('======================================================');

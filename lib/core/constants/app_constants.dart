@@ -15,11 +15,25 @@ abstract final class AppConstants {
   static const Duration requestCountdown = Duration(seconds: 15);
   static const Duration screenTransition = Duration(milliseconds: 350);
 
-  // Supabase — values are injected from the environment at build time
-  // (`--dart-define`). They live here only as keys; no secret is committed.
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const String supabaseAnonKey =
-      String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Supabase config.
+  //
+  // Preferred: pass these at build time via --dart-define(-from-file) (see
+  // run-live.sh). As a FALLBACK — so the app also connects when launched from
+  // the IDE's plain Debug button (which passes no --dart-define) — paste your
+  // project's URL and ANON key below.
+  //
+  // The anon key is a PUBLIC client key (protected by Row Level Security) and
+  // is safe to ship in the app. NEVER put the service_role key here.
+  static const String _fallbackSupabaseUrl =
+      'https://ovagqwoipzjokueqqubs.supabase.co';
+  static const String _fallbackSupabaseAnonKey =
+      ''; // <-- paste your Supabase anon key here
+
+  static const String supabaseUrl =
+      String.fromEnvironment('SUPABASE_URL', defaultValue: _fallbackSupabaseUrl);
+  static const String supabaseAnonKey = String.fromEnvironment(
+      'SUPABASE_ANON_KEY',
+      defaultValue: _fallbackSupabaseAnonKey);
 
   // Supabase table names (kept here so the data layer has a single source).
   // These match the deployed schema (see supabase/schema.sql).
