@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/location_sharing_service.dart';
 import '../../domain/entities/fare_breakdown.dart';
 import '../../domain/entities/ride_request.dart';
 import '../../domain/usecases/accept_request.dart';
@@ -21,9 +22,11 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     required AcceptRequest acceptRequest,
     required CompleteTrip completeTrip,
     required TripRepository repository,
+    LocationSharingService? locationSharing,
   })  : _acceptRequest = acceptRequest,
         _completeTrip = completeTrip,
         _repository = repository,
+        _locationSharing = locationSharing,
         super(const TripState()) {
     on<TripRequestOpened>(_onRequestOpened);
     on<_TripCountdownTicked>(_onCountdownTicked);
@@ -38,6 +41,7 @@ class TripBloc extends Bloc<TripEvent, TripState> {
   final AcceptRequest _acceptRequest;
   final CompleteTrip _completeTrip;
   final TripRepository _repository;
+  final LocationSharingService? _locationSharing;
 
   Timer? _countdownTimer;
 
@@ -80,11 +84,15 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     final result = await _acceptRequest(request.id);
     result.fold(
       (failure) => emit(state.copyWith(status: TripStatus.failure, errorMessage: failure.message)),
-      (accepted) => emit(state.copyWith(
-        phase: TripPhase.navigateToPickup,
-        status: TripStatus.idle,
-        request: accepted,
-      )),
+      (accepted) {
+        // Start streaming the captain's GPS so the rider can track the car.
+        _locationSharing?.start(accepted.id);
+        emit(state.copyWith(
+          phase: TripPhase.navigateToPickup,
+          status: TripStatus.idle,
+          request: accepted,
+        ));
+      },
     );
   }
 
@@ -94,6 +102,7 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     if (request != null) {
       await _repository.declineRequest(request.id);
     }
+    await _locationSharing?.stop();
     emit(const TripState());
   }
 
@@ -117,22 +126,27 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     final result = await _completeTrip(request.id);
     result.fold(
       (failure) => emit(state.copyWith(status: TripStatus.failure, errorMessage: failure.message)),
-      (breakdown) => emit(state.copyWith(
-        phase: TripPhase.completed,
-        status: TripStatus.idle,
-        fareBreakdown: breakdown,
-      )),
+      (breakdown) {
+        _locationSharing?.stop();
+        emit(state.copyWith(
+          phase: TripPhase.completed,
+          status: TripStatus.idle,
+          fareBreakdown: breakdown,
+        ));
+      },
     );
   }
 
   void _onReset(TripReset event, Emitter<TripState> emit) {
     _countdownTimer?.cancel();
+    _locationSharing?.stop();
     emit(const TripState());
   }
 
   @override
   Future<void> close() {
     _countdownTimer?.cancel();
+    _locationSharing?.stop();
     return super.close();
   }
 }

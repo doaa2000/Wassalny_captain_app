@@ -66,6 +66,7 @@ import '../../features/wallet/domain/usecases/get_wallet.dart';
 import '../../features/wallet/domain/usecases/request_withdrawal.dart';
 import '../../features/wallet/presentation/bloc/wallet_bloc.dart';
 import '../constants/app_constants.dart';
+import '../services/location_sharing_service.dart';
 import '../services/supabase_service.dart';
 
 /// Global service locator.
@@ -141,9 +142,15 @@ void _registerTrip(bool useRemote) {
   sl.registerLazySingleton(() => WatchNearbyRequests(sl()));
   sl.registerLazySingleton(() => AcceptRequest(sl()));
   sl.registerLazySingleton(() => CompleteTrip(sl()));
+  sl.registerLazySingleton(() => LocationSharingService(sl<SupabaseService>()));
   // Shared across the trip flow and dashboard, so it's a singleton.
   sl.registerLazySingleton(
-    () => TripBloc(acceptRequest: sl(), completeTrip: sl(), repository: sl()),
+    () => TripBloc(
+      acceptRequest: sl(),
+      completeTrip: sl(),
+      repository: sl(),
+      locationSharing: sl<LocationSharingService>(),
+    ),
   );
 }
 
