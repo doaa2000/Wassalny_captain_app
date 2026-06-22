@@ -91,9 +91,22 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
 
   @override
   Future<CaptainModel?> currentCaptain() async {
-    final String? id = _service.currentUserId;
-    if (id == null) return null;
-    return _profileFor(id);
+    // Base the decision on the persisted auth session, NOT on a successful
+    // profile fetch — otherwise a transient/RLS/offline error on launch would
+    // wrongly sign the captain out and force a re-login every time.
+    final sb.User? user = _service.client.auth.currentUser;
+    if (user == null) return null;
+    try {
+      return await _profileFor(user.id);
+    } catch (_) {
+      // Valid session, but we couldn't load the profile right now — keep the
+      // captain signed in with what the session already gives us.
+      return CaptainModel.fromJson({
+        'id': user.id,
+        'name': (user.userMetadata?['full_name'] as String?) ?? '',
+        'phone': user.phone ?? user.email ?? '',
+      });
+    }
   }
 
   Future<CaptainModel> _profileFor(String? userId) async {
