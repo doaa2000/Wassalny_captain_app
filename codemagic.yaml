@@ -10,7 +10,7 @@ workflows:
       vars:
         PACKAGE_NAME: "eg.wassalny.captain"
       android_signing:
-        - wassalny_captain_release
+        -  wassalny-captain
       flutter: stable
     triggering:
       events:
