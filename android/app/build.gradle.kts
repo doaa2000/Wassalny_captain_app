@@ -15,7 +15,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wassalny_captain"
+    namespace = "eg.wassalny.captain"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.wassalny_captain"
+        applicationId = "eg.wassalny.captain"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
