@@ -76,4 +76,7 @@ class TripLocalDataSource implements TripRemoteDataSource {
       paymentMethod: req.paymentMethod,
     );
   }
+
+  @override
+  Stream<String> watchTripStatus(String tripId) => const Stream<String>.empty();
 }

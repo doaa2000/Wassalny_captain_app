@@ -110,4 +110,13 @@ class TripSupabaseDataSource implements TripRemoteDataSource {
       throw ServerException(e.toString());
     }
   }
+
+  @override
+  Stream<String> watchTripStatus(String tripId) {
+    return _service.client
+        .from(AppConstants.tableTrips)
+        .stream(primaryKey: ['id'])
+        .eq('id', tripId)
+        .map((rows) => rows.isEmpty ? '' : (rows.first['status'] as String? ?? ''));
+  }
 }

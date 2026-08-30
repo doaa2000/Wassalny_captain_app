@@ -49,3 +49,9 @@ class TripCompletedRequested extends TripEvent {
 class TripReset extends TripEvent {
   const TripReset();
 }
+
+/// Internal: the trip-status subscription observed the rider cancelling
+/// (status flipped to 'cancelled' on a trip this captain already accepted).
+class _TripCancelledRemotely extends TripEvent {
+  const _TripCancelledRemotely();
+}

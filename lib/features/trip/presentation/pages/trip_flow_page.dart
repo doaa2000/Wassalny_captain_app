@@ -29,6 +29,17 @@ class TripFlowPage extends StatelessWidget {
           if (state.phase == TripPhase.expired || state.phase == TripPhase.idle) {
             context.go(AppRoutes.dashboard);
           }
+          if (state.phase == TripPhase.cancelledByRider) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  backgroundColor: AppColors.danger,
+                  content: Text('The rider cancelled this trip.'),
+                ),
+              );
+            context.go(AppRoutes.dashboard);
+          }
           // Surface accept/complete failures instead of silently doing nothing.
           if (state.status == TripStatus.failure && state.errorMessage != null) {
             ScaffoldMessenger.of(context)
@@ -62,6 +73,7 @@ class TripFlowPage extends StatelessWidget {
                 },
               ),
             TripPhase.idle => const SizedBox.shrink(),
+            TripPhase.cancelledByRider => const SizedBox.shrink(),
           };
 
           return AnimatedSwitcher(

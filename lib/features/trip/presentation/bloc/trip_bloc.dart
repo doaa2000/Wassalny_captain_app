@@ -33,6 +33,7 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     on<TripStarted>(_onStarted);
     on<TripCompletedRequested>(_onCompleted);
     on<TripReset>(_onReset);
+    on<_TripCancelledRemotely>(_onCancelledRemotely);
   }
 
   final AcceptRequest _acceptRequest;
@@ -40,6 +41,7 @@ class TripBloc extends Bloc<TripEvent, TripState> {
   final TripRepository _repository;
 
   Timer? _countdownTimer;
+  StreamSubscription<String>? _statusSub;
 
   void _onRequestOpened(TripRequestOpened event, Emitter<TripState> emit) {
     final int seconds = AppConstants.requestCountdown.inSeconds;
@@ -80,12 +82,33 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     final result = await _acceptRequest(request.id);
     result.fold(
       (failure) => emit(state.copyWith(status: TripStatus.failure, errorMessage: failure.message)),
-      (accepted) => emit(state.copyWith(
-        phase: TripPhase.navigateToPickup,
-        status: TripStatus.idle,
-        request: accepted,
-      )),
+      (accepted) {
+        emit(state.copyWith(
+          phase: TripPhase.navigateToPickup,
+          status: TripStatus.idle,
+          request: accepted,
+        ));
+        _watchForCancellation(accepted.id);
+      },
     );
+  }
+
+  /// Watches the accepted trip's status live — the rider's cancel button
+  /// updates this same row directly, and nothing else tells this app about
+  /// it otherwise. Stopped once the trip is past the cancellable window
+  /// (arrived/in-progress) or the flow ends.
+  void _watchForCancellation(String tripId) {
+    _statusSub?.cancel();
+    _statusSub = _repository.watchTripStatus(tripId).listen((status) {
+      if (status == 'cancelled') add(const _TripCancelledRemotely());
+    });
+  }
+
+  void _onCancelledRemotely(
+      _TripCancelledRemotely event, Emitter<TripState> emit) {
+    _statusSub?.cancel();
+    _statusSub = null;
+    emit(state.copyWith(phase: TripPhase.cancelledByRider, status: TripStatus.idle));
   }
 
   Future<void> _onDeclined(TripDeclined event, Emitter<TripState> emit) async {
@@ -100,12 +123,16 @@ class TripBloc extends Bloc<TripEvent, TripState> {
   Future<void> _onArrived(TripArrivedAtPickup event, Emitter<TripState> emit) async {
     final RideRequest? request = state.request;
     if (request != null) await _repository.markArrived(request.id);
+    // Still watching — the rider can cancel through 'arrived' too, only
+    // 'in_progress' and later are no longer cancellable.
     emit(state.copyWith(phase: TripPhase.arrived));
   }
 
   Future<void> _onStarted(TripStarted event, Emitter<TripState> emit) async {
     final RideRequest? request = state.request;
     if (request != null) await _repository.startTrip(request.id);
+    _statusSub?.cancel();
+    _statusSub = null;
     emit(state.copyWith(phase: TripPhase.inProgress));
   }
 
@@ -127,12 +154,15 @@ class TripBloc extends Bloc<TripEvent, TripState> {
 
   void _onReset(TripReset event, Emitter<TripState> emit) {
     _countdownTimer?.cancel();
+    _statusSub?.cancel();
+    _statusSub = null;
     emit(const TripState());
   }
 
   @override
   Future<void> close() {
     _countdownTimer?.cancel();
+    _statusSub?.cancel();
     return super.close();
   }
 }

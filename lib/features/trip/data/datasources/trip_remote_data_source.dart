@@ -17,4 +17,10 @@ abstract interface class TripRemoteDataSource {
   Future<void> markArrived(String requestId);
   Future<void> startTrip(String requestId);
   Future<FareBreakdownModel> completeTrip(String requestId);
+
+  /// Live stream of a single trip's status after this driver has accepted
+  /// it — the only way the app finds out if the rider cancels mid-flow
+  /// (before the trip reaches `in_progress`), since nothing else watches an
+  /// already-accepted trip for external changes.
+  Stream<String> watchTripStatus(String tripId);
 }
