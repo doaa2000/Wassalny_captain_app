@@ -59,6 +59,11 @@ class TripRepositoryImpl implements TripRepository {
     return _guard(() async => _remote.completeTrip(requestId));
   }
 
+  @override
+  Stream<String> watchTripStatus(String tripId) {
+    return _remote.watchTripStatus(tripId);
+  }
+
   /// Shared error-handling wrapper used by every repository method.
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() action) async {
     try {

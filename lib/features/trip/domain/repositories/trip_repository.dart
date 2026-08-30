@@ -27,4 +27,8 @@ abstract interface class TripRepository {
 
   /// Complete the trip and settle the fare.
   Future<Either<Failure, FareBreakdown>> completeTrip(String requestId);
+
+  /// Live status of an already-accepted trip — the only way the app learns
+  /// the rider cancelled before the trip reached `in_progress`.
+  Stream<String> watchTripStatus(String tripId);
 }

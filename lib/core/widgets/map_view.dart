@@ -90,13 +90,16 @@ class _MapViewState extends State<MapView> {
         ),
       );
       await Future<void>.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return; // screen may have been left during the delay
       await controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 64));
     }
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    // The GoogleMap widget owns the controller; don't dispose it here or a
+    // pending async camera call would hit a disposed controller.
+    _controller = null;
     super.dispose();
   }
 

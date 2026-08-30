@@ -1,7 +1,16 @@
 part of 'trip_bloc.dart';
 
 /// Lifecycle phase the captain is currently in.
-enum TripPhase { idle, incoming, expired, navigateToPickup, arrived, inProgress, completed }
+enum TripPhase {
+  idle,
+  incoming,
+  expired,
+  navigateToPickup,
+  arrived,
+  inProgress,
+  completed,
+  cancelledByRider,
+}
 
 enum TripStatus { idle, processing, failure }
 
