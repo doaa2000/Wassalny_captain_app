@@ -54,7 +54,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       name: event.name,
       nationalId: event.nationalId,
       licenseNumber: event.licenseNumber,
-      phone: event.phone,
+      email: event.email,
+      password: event.password,
     ));
     result.fold(
       (f) => emit(state.copyWith(status: AuthStatus.failure, errorMessage: f.message)),

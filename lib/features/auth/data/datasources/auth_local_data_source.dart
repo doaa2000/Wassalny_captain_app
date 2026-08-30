@@ -21,7 +21,8 @@ class AuthLocalDataSource implements AuthRemoteDataSource {
     required String name,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
+    required String email,
+    required String password,
   }) async {}
 
   @override

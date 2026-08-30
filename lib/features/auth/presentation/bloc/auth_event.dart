@@ -21,16 +21,18 @@ class AuthRegisterSubmitted extends AuthEvent {
     required this.name,
     required this.nationalId,
     required this.licenseNumber,
-    required this.phone,
+    required this.email,
+    required this.password,
   });
 
   final String name;
   final String nationalId;
   final String licenseNumber;
-  final String phone;
+final String email;
+  final String password;
 
   @override
-  List<Object?> get props => [name, nationalId, licenseNumber, phone];
+  List<Object?> get props => [name, nationalId, licenseNumber, email, password];
 }
 
 class AuthOtpSubmitted extends AuthEvent {

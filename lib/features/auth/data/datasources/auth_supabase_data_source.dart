@@ -13,13 +13,14 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   final SupabaseService _service;
 
   @override
-  Future<CaptainModel> login({required String phone, required String password}) async {
+  Future<CaptainModel> login(
+      {required String phone, required String password}) async {
     try {
       // Email-based auth: the `phone` argument carries the login identifier
       // (the captain's email). Phone+password needs a paid SMS provider, so we
       // use email until that's configured.
-      final sb.AuthResponse res =
-          await _service.client.auth.signInWithPassword(email: phone, password: password);
+      final sb.AuthResponse res = await _service.client.auth
+          .signInWithPassword(email: phone, password: password);
       return await _profileFor(res.user?.id, requireDriver: true);
     } on CaptainRemovedException {
       // Credentials were valid (a session was created) but the captain has no
@@ -35,17 +36,25 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
 
   @override
   Future<void> register({
-    required String name,
+ required String   name,
+    required String email,
+    required String password,
     required String nationalId,
-    required String licenseNumber,
-    required String phone,
+   required String  licenseNumber,
   }) async {
     try {
       // Phone-based onboarding: send the OTP so the app can continue to the
       // verification screen. The captain's profile is auto-created by the
       // `handle_new_user` trigger on first sign-in; the driver/vehicle row and
       // KYC documents are completed afterwards (admin reviews + approves).
-      await _service.client.auth.signInWithOtp(phone: phone);
+      await _service.client.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': name,
+          'role': 'driver',
+        },
+      );
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -61,7 +70,8 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   }
 
   @override
-  Future<CaptainModel> verifyOtp({required String phone, required String code}) async {
+  Future<CaptainModel> verifyOtp(
+      {required String phone, required String code}) async {
     try {
       final sb.AuthResponse res = await _service.client.auth.verifyOTP(
         phone: phone,

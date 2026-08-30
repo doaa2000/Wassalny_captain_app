@@ -21,14 +21,16 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
+    required String email,
+    required String password,
   }) {
     return _guard(() async {
       await _remote.register(
         name: name,
         nationalId: nationalId,
         licenseNumber: licenseNumber,
-        phone: phone,
+       email: email,
+       password: password,
       );
       return unit;
     });

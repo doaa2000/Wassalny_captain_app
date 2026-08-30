@@ -11,7 +11,8 @@ abstract interface class AuthRepository {
     required String name,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
+    required String email,
+    required String password,
   });
 
   Future<Either<Failure, Unit>> requestOtp(String phone);
