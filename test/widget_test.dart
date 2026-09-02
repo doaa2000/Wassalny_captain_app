@@ -1,31 +1,54 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wassalny_captain/app.dart';
+import 'package:wassalny_captain/features/trip/data/models/ride_request_model.dart';
 
-import 'package:wassalny_captain/main.dart';
-
+/// Smoke tests for the passenger-contact plumbing: the ride request model must
+/// carry the passenger's phone through JSON (de)serialization and through the
+/// `trips`-table row mapping so the captain can call / message the passenger.
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const WassalnyCaptainApp());
+  group('RideRequestModel passenger contact', () {
+    test('fromJson/toJson round-trips the passenger phone', () {
+      const phone = '+20 100 123 4567';
+      final RideRequestModel model = RideRequestModel.fromJson(const {
+        'id': 42,
+        'passenger_name': 'Nadia Saleh',
+        'passenger_phone': phone,
+      });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(model.passengerPhone, phone);
+      expect(model.toJson()['passenger_phone'], phone);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('fromJson falls back to an empty phone when missing', () {
+      final RideRequestModel model = RideRequestModel.fromJson(const {'id': 7});
+      expect(model.passengerPhone, '');
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('fromTripRow reads the phone from the embedded passenger', () {
+      final RideRequestModel model = RideRequestModel.fromTripRow(const {
+        'id': 'trip-1',
+        'trip_price': 96,
+        'passenger': {'full_name': 'Omar Adel', 'phone': '+201019876543'},
+      });
+
+      expect(model.passengerName, 'Omar Adel');
+      expect(model.passengerPhone, '+201019876543');
+    });
+
+    test('fromTripRow defaults to an empty phone without a passenger', () {
+      final RideRequestModel model =
+          RideRequestModel.fromTripRow(const {'id': 'trip-2'});
+      expect(model.passengerPhone, '');
+    });
+
+    test('copyWith preserves the passenger phone', () {
+      final RideRequestModel model = RideRequestModel.fromJson(const {
+        'id': 42,
+        'passenger_phone': '+20 100 123 4567',
+      });
+
+      final RideRequestModel retarged = model.copyWith(fare: 'EGP 120', fareAmount: 120);
+      expect(retarged.passengerPhone, '+20 100 123 4567');
+      expect(retarged.fare, 'EGP 120');
+    });
   });
 }

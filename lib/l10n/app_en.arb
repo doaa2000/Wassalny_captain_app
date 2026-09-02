@@ -222,5 +222,9 @@
   "completion": "Completion",
 
   "editProfileTitle": "Edit profile",
-  "saveChanges": "Save changes"
+  "saveChanges": "Save changes",
+
+  "callPassenger": "Call passenger",
+  "messagePassenger": "Message passenger",
+  "communicationFailed": "Couldn't open call / messages. Please try again."
 }

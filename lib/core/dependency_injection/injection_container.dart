@@ -54,6 +54,7 @@ import '../../features/trip/data/datasources/trip_local_data_source.dart';
 import '../../features/trip/data/datasources/trip_remote_data_source.dart';
 import '../../features/trip/data/datasources/trip_supabase_data_source.dart';
 import '../../features/trip/data/repositories/trip_repository_impl.dart';
+import '../../features/trip/data/services/communication_service.dart';
 import '../../features/trip/domain/repositories/trip_repository.dart';
 import '../../features/trip/domain/usecases/accept_request.dart';
 import '../../features/trip/domain/usecases/complete_trip.dart';
@@ -151,6 +152,7 @@ void _registerTrip(bool useRemote) {
   sl.registerLazySingleton<TripRemoteDataSource>(
     () => useRemote ? TripSupabaseDataSource(sl()) : TripLocalDataSource(),
   );
+  sl.registerLazySingleton<CommunicationService>(() => const CommunicationService());
   sl.registerLazySingleton<TripRepository>(() => TripRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetNearbyRequests(sl()));
   sl.registerLazySingleton(() => WatchNearbyRequests(sl()));

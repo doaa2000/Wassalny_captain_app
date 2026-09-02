@@ -1189,6 +1189,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save changes'**
   String get saveChanges;
+
+  /// No description provided for @callPassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Call passenger'**
+  String get callPassenger;
+
+  /// No description provided for @messagePassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Message passenger'**
+  String get messagePassenger;
+
+  /// No description provided for @communicationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open call / messages. Please try again.'**
+  String get communicationFailed;
 }
 
 class _AppLocalizationsDelegate

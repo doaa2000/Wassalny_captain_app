@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:wassalny_captain/l10n/app_localizations.dart';
 
+import '../../../../core/dependency_injection/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/map_view.dart';
+import '../../data/services/communication_service.dart';
 import '../../domain/entities/ride_request.dart';
 import '../bloc/trip_bloc.dart';
 import '../widgets/map_sheet.dart';
@@ -17,6 +19,26 @@ class ActiveTripView extends StatelessWidget {
   const ActiveTripView({super.key, required this.request});
 
   final RideRequest request;
+
+  Future<void> _call(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final ok = await sl<CommunicationService>().callPassenger(request.passengerPhone);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.communicationFailed)));
+    }
+  }
+
+  Future<void> _message(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final ok = await sl<CommunicationService>().messagePassenger(request.passengerPhone);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.communicationFailed)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +120,19 @@ class ActiveTripView extends StatelessWidget {
                   request: request,
                   subtitle: l.tripTo(request.dropoff),
                   avatarSize: 52,
-                  trailing: const [SizedBox(width: 8), CircleActionButton(icon: Icons.call_rounded, filled: true)],
+                  trailing: [
+                    const SizedBox(width: 8),
+                    CircleActionButton(
+                      icon: Icons.call_rounded,
+                      filled: true,
+                      onPressed: () => _call(context),
+                    ),
+                    const SizedBox(width: 8),
+                    CircleActionButton(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      onPressed: () => _message(context),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 AppButton(

@@ -209,5 +209,9 @@
   "completion": "معدل الإكمال",
 
   "editProfileTitle": "تعديل الملف الشخصي",
-  "saveChanges": "حفظ التغييرات"
+  "saveChanges": "حفظ التغييرات",
+
+  "callPassenger": "اتصال بالراكب",
+  "messagePassenger": "رسالة للراكب",
+  "communicationFailed": "تعذّر فتح الاتصال / الرسائل. حاول مرة أخرى."
 }

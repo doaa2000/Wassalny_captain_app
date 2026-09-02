@@ -16,6 +16,7 @@ class RideRequest extends Equatable {
     required this.pickupDistance,
     required this.passengerName,
     required this.passengerInitials,
+    required this.passengerPhone,
     required this.passengerRating,
     required this.paymentMethod,
   });
@@ -44,6 +45,10 @@ class RideRequest extends Equatable {
 
   final String passengerName;
   final String passengerInitials;
+
+  /// Passenger's phone number for call / SMS communication.
+  final String passengerPhone;
+
   final String passengerRating;
 
   /// "Cash" or "Wallet".

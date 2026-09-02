@@ -584,4 +584,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveChanges => 'Save changes';
+
+  @override
+  String get callPassenger => 'Call passenger';
+
+  @override
+  String get messagePassenger => 'Message passenger';
+
+  @override
+  String get communicationFailed =>
+      'Couldn\'t open call / messages. Please try again.';
 }

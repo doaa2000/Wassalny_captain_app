@@ -17,6 +17,7 @@ class RideRequestModel extends RideRequest {
     required super.pickupDistance,
     required super.passengerName,
     required super.passengerInitials,
+    required super.passengerPhone,
     required super.passengerRating,
     required super.paymentMethod,
   });
@@ -35,6 +36,7 @@ class RideRequestModel extends RideRequest {
       pickupDistance: json['pickup_distance'] as String? ?? '',
       passengerName: json['passenger_name'] as String? ?? '',
       passengerInitials: json['passenger_initials'] as String? ?? '',
+      passengerPhone: json['passenger_phone'] as String? ?? '',
       passengerRating: json['passenger_rating']?.toString() ?? '5.0',
       paymentMethod: json['payment_method'] as String? ?? 'Cash',
     );
@@ -52,6 +54,7 @@ class RideRequestModel extends RideRequest {
         'pickup_distance': pickupDistance,
         'passenger_name': passengerName,
         'passenger_initials': passengerInitials,
+        'passenger_phone': passengerPhone,
         'passenger_rating': passengerRating,
         'payment_method': paymentMethod,
       };
@@ -81,6 +84,7 @@ class RideRequestModel extends RideRequest {
       pickupDistance: json['pickup_distance'] as String? ?? '',
       passengerName: name,
       passengerInitials: _initialsOf(name),
+      passengerPhone: (passenger?['phone'] as String?) ?? '',
       passengerRating: json['passenger_rating']?.toString() ?? '5.0',
       paymentMethod: method.isEmpty ? 'Cash' : '${method[0].toUpperCase()}${method.substring(1)}',
     );
@@ -112,6 +116,7 @@ class RideRequestModel extends RideRequest {
       pickupDistance: pickupDistance,
       passengerName: passengerName,
       passengerInitials: passengerInitials,
+      passengerPhone: passengerPhone,
       passengerRating: passengerRating,
       paymentMethod: paymentMethod,
     );

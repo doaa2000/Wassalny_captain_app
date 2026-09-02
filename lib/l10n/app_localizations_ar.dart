@@ -581,4 +581,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get callPassenger => 'اتصال بالراكب';
+
+  @override
+  String get messagePassenger => 'رسالة للراكب';
+
+  @override
+  String get communicationFailed =>
+      'تعذّر فتح الاتصال / الرسائل. حاول مرة أخرى.';
 }

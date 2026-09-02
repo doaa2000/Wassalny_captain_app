@@ -18,7 +18,7 @@ class TripSupabaseDataSource implements TripRemoteDataSource {
   static const String _openSelect =
       'id, pickup_address, destination_address, estimated_distance, estimated_duration, '
       'trip_price, payment_method, status, driver_id, created_at, '
-      'passenger:profiles!trips_passenger_id_fkey ( full_name )';
+      'passenger:profiles!trips_passenger_id_fkey ( full_name, phone )';
 
   @override
   Future<List<RideRequestModel>> fetchNearbyRequests() async {
