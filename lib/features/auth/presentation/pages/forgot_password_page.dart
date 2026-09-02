@@ -21,7 +21,7 @@ class ForgotPasswordPage extends StatefulWidget {
 }
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  final TextEditingController _phone = TextEditingController(text: '106 884 2190');
+  final TextEditingController _phone = TextEditingController();
 
   @override
   void dispose() {
@@ -34,7 +34,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: AuthListener(
-        onResetSent: () => context.push(AppRoutes.otp),
+        onResetSent: () => context.push(AppRoutes.otp, extra: _phone.text.trim()),
         child: SafeArea(
           child: ResponsiveCenter(
             child: Padding(

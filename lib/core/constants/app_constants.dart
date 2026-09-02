@@ -39,6 +39,8 @@ abstract final class AppConstants {
   // These match the deployed schema (see supabase/schema.sql).
   static const String tableProfiles = 'profiles';
   static const String tableDrivers = 'drivers';
+  static const String tableDriverDocuments = 'driver_documents';
+  static const String storageDriverDocuments = 'driver-documents';
   static const String tableTrips = 'trips';
   static const String tableDriverLocations = 'driver_locations';
   static const String tableNotifications = 'notifications';

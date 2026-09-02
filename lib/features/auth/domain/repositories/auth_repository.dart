@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -7,11 +9,20 @@ import '../entities/captain.dart';
 abstract interface class AuthRepository {
   Future<Either<Failure, Captain>> login({required String phone, required String password});
 
-  Future<Either<Failure, Unit>> register({
+  /// Registers a new captain (email + password, same mechanism as [login]).
+  /// Creates the driver/vehicle record and uploads KYC [documents] in one
+  /// go, returning the captain directly — no separate OTP step.
+  Future<Either<Failure, Captain>> register({
+    required String email,
+    required String password,
     required String name,
+    required String phone,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
+    required String vehicleModel,
+    required int vehicleYear,
+    required String plateNumber,
+    required Map<String, Uint8List> documents,
   });
 
   Future<Either<Failure, Unit>> requestOtp(String phone);

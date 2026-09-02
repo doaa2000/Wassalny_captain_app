@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -51,14 +53,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onRegister(AuthRegisterSubmitted event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
     final result = await _register(RegisterParams(
+      email: event.email,
+      password: event.password,
       name: event.name,
+      phone: event.phone,
       nationalId: event.nationalId,
       licenseNumber: event.licenseNumber,
-      phone: event.phone,
+      vehicleModel: event.vehicleModel,
+      vehicleYear: event.vehicleYear,
+      plateNumber: event.plateNumber,
+      documents: event.documents,
     ));
     result.fold(
       (f) => emit(state.copyWith(status: AuthStatus.failure, errorMessage: f.message)),
-      (_) => emit(state.copyWith(status: AuthStatus.registered)),
+      (captain) => emit(state.copyWith(status: AuthStatus.success, captain: captain)),
     );
   }
 

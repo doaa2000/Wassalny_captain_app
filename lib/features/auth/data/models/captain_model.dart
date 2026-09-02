@@ -8,6 +8,8 @@ class CaptainModel extends Captain {
     required super.initials,
     super.rating,
     super.memberSince,
+    super.approvalStatus,
+    super.rejectionReason,
   });
 
   factory CaptainModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,8 @@ class CaptainModel extends Captain {
       initials: json['initials'] as String? ?? _initialsOf(name),
       rating: json['rating']?.toString() ?? '0.0',
       memberSince: json['member_since'] as String?,
+      approvalStatus: json['approval_status'] as String? ?? 'pending',
+      rejectionReason: json['rejection_reason'] as String?,
     );
   }
 
@@ -29,6 +33,8 @@ class CaptainModel extends Captain {
         'initials': initials,
         'rating': rating,
         'member_since': memberSince,
+        'approval_status': approvalStatus,
+        'rejection_reason': rejectionReason,
       };
 
   static String _initialsOf(String name) {

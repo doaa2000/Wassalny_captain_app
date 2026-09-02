@@ -1,19 +1,27 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/section_header.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_listener.dart';
 import '../widgets/document_tile.dart';
+
+/// Maps the 3 KYC documents this form collects to the server's
+/// `document_type` enum values.
+const Map<String, String> _kDocumentTypes = {
+  'License': 'driver_license',
+  'Vehicle reg.': 'vehicle_registration',
+  'Insurance': 'vehicle_insurance',
+};
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -23,135 +31,210 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final TextEditingController _name = TextEditingController(text: 'Tarek Mahmoud');
-  final TextEditingController _nationalId = TextEditingController(text: 'National ID · 2880…');
-  final TextEditingController _license = TextEditingController(text: 'Driving license · DL-77…');
-  final TextEditingController _model = TextEditingController(text: 'Toyota Corolla');
-  final TextEditingController _year = TextEditingController(text: '2021');
-  final TextEditingController _plate = TextEditingController(text: 'Plate · RST 4821');
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _phone = TextEditingController();
+  final _nationalId = TextEditingController();
+  final _licenseNumber = TextEditingController();
+  final _vehicleModel = TextEditingController();
+  final _vehicleYear = TextEditingController();
+  final _plateNumber = TextEditingController();
+
+  final Map<String, Uint8List> _documents = {};
+  String? _documentError;
 
   @override
   void dispose() {
-    for (final c in [_name, _nationalId, _license, _model, _year, _plate]) {
-      c.dispose();
-    }
+    _name.dispose();
+    _email.dispose();
+    _password.dispose();
+    _phone.dispose();
+    _nationalId.dispose();
+    _licenseNumber.dispose();
+    _vehicleModel.dispose();
+    _vehicleYear.dispose();
+    _plateNumber.dispose();
     super.dispose();
   }
 
+  Future<void> _pickDocument(String label) async {
+    final XFile? file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (file == null) return;
+    final Uint8List bytes = await file.readAsBytes();
+    setState(() {
+      _documents[_kDocumentTypes[label]!] = bytes;
+      _documentError = null;
+    });
+  }
+
   void _submit() {
-    context.read<AuthBloc>().add(AuthRegisterSubmitted(
-          name: _name.text,
-          nationalId: _nationalId.text,
-          licenseNumber: _license.text,
-          phone: '106 884 2190',
-        ));
+    if (!_formKey.currentState!.validate()) return;
+    if (_documents.length < _kDocumentTypes.length) {
+      setState(() => _documentError = 'Please upload all 3 documents.');
+      return;
+    }
+    final int? year = int.tryParse(_vehicleYear.text.trim());
+    if (year == null) return;
+    context.read<AuthBloc>().add(
+          AuthRegisterSubmitted(
+            email: _email.text.trim(),
+            password: _password.text,
+            name: _name.text.trim(),
+            phone: _phone.text.trim(),
+            nationalId: _nationalId.text.trim(),
+            licenseNumber: _licenseNumber.text.trim(),
+            vehicleModel: _vehicleModel.text.trim(),
+            vehicleYear: year,
+            plateNumber: _plateNumber.text.trim(),
+            documents: _documents,
+          ),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       body: AuthListener(
-        onRegistered: () => context.push(AppRoutes.otp),
+        onAuthenticated: (captain) => routeAfterAuth(context, captain),
         child: SafeArea(
-          child: ResponsiveCenter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          AppBackButton(onPressed: () => context.pop()),
-                          const SizedBox(width: 12),
-                          Text('Become a captain',
-                              style: AppTextStyles.titleSmall.copyWith(color: context.colors.onSurface)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const _StepProgress(activeSteps: 2, totalSteps: 3),
-                    ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const AppBackButton(),
+                  const SizedBox(height: 20),
+                  Text('Become a captain', style: AppTextStyles.title),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tell us about you and your vehicle. An admin reviews every application.',
+                    style: AppTextStyles.body.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65)),
                   ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(22, 14, 22, 28),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SectionHeader('Driver information'),
-                        AppTextField(controller: _name),
-                        const SizedBox(height: 12),
-                        AppTextField(controller: _nationalId),
-                        const SizedBox(height: 12),
-                        AppTextField(controller: _license),
-                        const SizedBox(height: 22),
-                        const SectionHeader('Vehicle information'),
-                        Row(
-                          children: [
-                            Expanded(child: AppTextField(controller: _model)),
-                            const SizedBox(width: 12),
-                            SizedBox(width: 92, child: AppTextField(controller: _year)),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        AppTextField(controller: _plate),
-                        const SizedBox(height: 22),
-                        const SectionHeader('Documents'),
-                        const Row(
-                          children: [
-                            Expanded(child: DocumentTile(label: 'License', uploaded: true)),
-                            SizedBox(width: 11),
-                            Expanded(child: DocumentTile(label: 'Vehicle reg.', uploaded: true)),
-                            SizedBox(width: 11),
-                            Expanded(child: DocumentTile(label: 'Insurance', uploaded: false)),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) => AppButton(
-                            label: 'Submit application',
-                            isLoading: state.isLoading,
-                            onPressed: _submit,
+                  const SizedBox(height: 28),
+
+                  Text('Your details', style: AppTextStyles.label),
+                  const SizedBox(height: 12),
+                  AppTextField(
+                    label: 'Full name',
+                    controller: _name,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Email',
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) =>
+                        (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Password',
+                    controller: _password,
+                    obscureText: true,
+                    validator: (v) =>
+                        (v == null || v.length < 6) ? 'At least 6 characters' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Phone number',
+                    controller: _phone,
+                    keyboardType: TextInputType.phone,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'National ID',
+                    controller: _nationalId,
+                    keyboardType: TextInputType.number,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Driving license number',
+                    controller: _licenseNumber,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+
+                  const SizedBox(height: 24),
+                  Text('Your vehicle', style: AppTextStyles.label),
+                  const SizedBox(height: 12),
+                  AppTextField(
+                    label: 'Vehicle model',
+                    controller: _vehicleModel,
+                    hintText: 'e.g. Toyota Corolla 2020',
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Vehicle year',
+                    controller: _vehicleYear,
+                    keyboardType: TextInputType.number,
+                    validator: (v) =>
+                        (v == null || int.tryParse(v.trim()) == null) ? 'Enter a year' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  AppTextField(
+                    label: 'Plate number',
+                    controller: _plateNumber,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+
+                  const SizedBox(height: 24),
+                  Text('Documents', style: AppTextStyles.label),
+                  const SizedBox(height: 4),
+                  Text('Tap each one to take or choose a photo.',
+                      style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      for (final String label in _kDocumentTypes.keys) ...[
+                        Expanded(
+                          child: DocumentTile(
+                            label: label,
+                            uploaded: _documents.containsKey(_kDocumentTypes[label]),
+                            onTap: () => _pickDocument(label),
                           ),
                         ),
+                        if (label != _kDocumentTypes.keys.last) const SizedBox(width: 11),
                       ],
+                    ],
+                  ),
+                  if (_documentError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(_documentError!,
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.danger)),
+                  ],
+
+                  const SizedBox(height: 24),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) => AppButton(
+                      label: 'Submit application',
+                      isLoading: state.isLoading,
+                      onPressed: state.isLoading ? null : _submit,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.go(AppRoutes.login),
+                      child: const Text('Already have an account? Log in'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _StepProgress extends StatelessWidget {
-  const _StepProgress({required this.activeSteps, required this.totalSteps});
-
-  final int activeSteps;
-  final int totalSteps;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(totalSteps, (i) {
-        return Expanded(
-          child: Container(
-            height: 5,
-            margin: EdgeInsets.only(right: i == totalSteps - 1 ? 0 : 7),
-            decoration: BoxDecoration(
-              color: i < activeSteps ? AppColors.primary : AppColors.darkTrack,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-        );
-      }),
     );
   }
 }

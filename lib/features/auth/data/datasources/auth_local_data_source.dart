@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../models/captain_model.dart';
 import 'auth_remote_data_source.dart';
 
@@ -11,18 +13,26 @@ class AuthLocalDataSource implements AuthRemoteDataSource {
     initials: 'TM',
     rating: '4.92',
     memberSince: 'Captain since 2021',
+    approvalStatus: 'approved',
   );
 
   @override
   Future<CaptainModel> login({required String phone, required String password}) async => _demoCaptain;
 
   @override
-  Future<void> register({
+  Future<CaptainModel> register({
+    required String email,
+    required String password,
     required String name,
+    required String phone,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
-  }) async {}
+    required String vehicleModel,
+    required int vehicleYear,
+    required String plateNumber,
+    required Map<String, Uint8List> documents,
+  }) async =>
+      _demoCaptain;
 
   @override
   Future<void> requestOtp(String phone) async {}

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
@@ -17,21 +19,30 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> register({
+  Future<Either<Failure, Captain>> register({
+    required String email,
+    required String password,
     required String name,
+    required String phone,
     required String nationalId,
     required String licenseNumber,
-    required String phone,
+    required String vehicleModel,
+    required int vehicleYear,
+    required String plateNumber,
+    required Map<String, Uint8List> documents,
   }) {
-    return _guard(() async {
-      await _remote.register(
-        name: name,
-        nationalId: nationalId,
-        licenseNumber: licenseNumber,
-        phone: phone,
-      );
-      return unit;
-    });
+    return _guard(() => _remote.register(
+          email: email,
+          password: password,
+          name: name,
+          phone: phone,
+          nationalId: nationalId,
+          licenseNumber: licenseNumber,
+          vehicleModel: vehicleModel,
+          vehicleYear: vehicleYear,
+          plateNumber: plateNumber,
+          documents: documents,
+        ));
   }
 
   @override
