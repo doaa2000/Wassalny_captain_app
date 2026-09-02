@@ -49,12 +49,15 @@ class TripSupabaseDataSource implements TripRemoteDataSource {
   }
 
   @override
-  Future<RideRequestModel> acceptRequest(String requestId) async {
+  Future<RideRequestModel> acceptRequest(String requestId, {double? offeredFare}) async {
     try {
       // Atomic claim: first approved driver wins (raises if already taken).
       final dynamic row = await _service.client.rpc(
         'accept_trip',
-        params: {'p_trip_id': requestId},
+        params: {
+          'p_trip_id': requestId,
+          if (offeredFare != null) 'p_trip_price': offeredFare,
+        },
       );
       return RideRequestModel.fromTripRow((row as Map<dynamic, dynamic>).cast<String, dynamic>());
     } catch (e) {

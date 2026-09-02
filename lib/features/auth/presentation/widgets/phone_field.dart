@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,15 +8,16 @@ import '../../../../core/widgets/app_text_field.dart';
 
 /// Phone input prefixed with the Egyptian flag + dial code, as in the design.
 class PhoneField extends StatelessWidget {
-  const PhoneField({super.key, this.controller, this.label = 'Phone number'});
+  const PhoneField({super.key, this.controller, this.label});
 
   final TextEditingController? controller;
-  final String label;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return AppTextField(
-      label: label,
+      label: label ?? l.phoneLabel,
       controller: controller,
       keyboardType: TextInputType.phone,
       prefix: Row(

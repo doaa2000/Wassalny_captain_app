@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -37,6 +37,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       body: BlocListener<SplashCubit, SplashState>(
         listener: (context, state) {
@@ -76,15 +77,15 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                       const SizedBox(height: 30),
                       Text.rich(
                         TextSpan(
-                          text: 'Wassalny ',
+                          text: l.splashWelcome,
                           style: AppTextStyles.display.copyWith(color: AppColors.textPrimaryDark),
-                          children: const [
-                            TextSpan(text: 'Captain', style: TextStyle(color: AppColors.primary)),
+                          children: [
+                            TextSpan(text: l.splashCaptain, style: const TextStyle(color: AppColors.primary)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(AppConstants.appTagline,
+                      Text(l.appTagline,
                           style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark)),
                       const SizedBox(height: 40),
                       const _LoadingDots(),
@@ -102,7 +103,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                       backgroundColor: Colors.white.withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: Text('Tap to continue',
+                    child: Text(l.splashTapToContinue,
                         style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark)),
                   ),
                 ),

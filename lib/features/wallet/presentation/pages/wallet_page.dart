@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -25,14 +26,14 @@ class WalletPage extends StatelessWidget {
           listener: (context, state) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(const SnackBar(content: Text('Withdrawal requested.')));
+              ..showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.withdrawalRequested)));
           },
           builder: (context, state) {
             final wallet = state.wallet;
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
               children: [
-                PageHeader(title: 'Wallet', showBack: true, onBack: () => context.pop()),
+                PageHeader(title: AppLocalizations.of(context)!.walletTitle, showBack: true, onBack: () => context.pop()),
                 const SizedBox(height: 16),
                 if (wallet == null)
                   const Padding(padding: EdgeInsets.only(top: 80), child: LoadingView())
@@ -42,11 +43,11 @@ class WalletPage extends StatelessWidget {
                     onWithdraw: () => context.read<WalletBloc>().add(const WalletWithdrawRequested()),
                   ),
                   const SizedBox(height: 22),
-                  Text('Payout account', style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
+                  Text(AppLocalizations.of(context)!.payoutAccount, style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
                   const SizedBox(height: 12),
                   _PayoutCard(account: wallet.payoutAccount),
                   const SizedBox(height: 22),
-                  Text('Transactions', style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
+                  Text(AppLocalizations.of(context)!.transactions, style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
                   const SizedBox(height: 12),
                   AppCard(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -88,7 +89,7 @@ class _BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Available balance', style: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.85))),
+          Text(AppLocalizations.of(context)!.availableBalance, style: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.85))),
           const SizedBox(height: 6),
           Text(wallet.availableBalance, style: AppTextStyles.amountLarge.copyWith(color: AppColors.white, fontSize: 36)),
           const SizedBox(height: 8),
@@ -114,7 +115,7 @@ class _BalanceCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               icon: const Icon(Icons.download_rounded, size: 19),
-              label: Text('Withdraw earnings', style: AppTextStyles.buttonSmall.copyWith(fontWeight: FontWeight.w800)),
+              label: Text(AppLocalizations.of(context)!.withdrawEarnings, style: AppTextStyles.buttonSmall.copyWith(fontWeight: FontWeight.w800)),
             ),
           ),
         ],
@@ -149,7 +150,7 @@ class _PayoutCard extends StatelessWidget {
               ],
             ),
           ),
-          if (account.verified) const StatusBadge(label: 'Verified', color: AppColors.success),
+          if (account.verified) StatusBadge(label: AppLocalizations.of(context)!.verified, color: AppColors.success),
         ],
       ),
     );

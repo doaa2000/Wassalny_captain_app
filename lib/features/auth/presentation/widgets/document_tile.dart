@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,6 +14,7 @@ class DocumentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final Color accent = uploaded ? AppColors.success : AppColors.textMutedDark;
     return GestureDetector(
       onTap: onTap,
@@ -29,7 +31,7 @@ class DocumentTile extends StatelessWidget {
                   color: uploaded ? AppColors.textPrimaryDark : AppColors.textSecondaryDark,
                   fontWeight: FontWeight.w700,
                 )),
-            Text(uploaded ? 'Uploaded' : 'Add',
+            Text(uploaded ? l.documentUploaded : l.documentAdd,
                 style: AppTextStyles.micro.copyWith(color: accent)),
           ],
         ),

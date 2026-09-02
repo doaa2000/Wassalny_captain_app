@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -12,13 +13,14 @@ class DashboardStatPills extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Row(
       children: [
-        Expanded(child: _Pill(label: 'Today', value: summary.todayEarnings, valueColor: AppColors.primary)),
+        Expanded(child: _Pill(label: l.today, value: summary.todayEarnings, valueColor: AppColors.primary)),
         const SizedBox(width: 10),
-        Expanded(child: _Pill(label: 'Trips', value: summary.tripsToday)),
+        Expanded(child: _Pill(label: l.trips, value: summary.tripsToday)),
         const SizedBox(width: 10),
-        Expanded(child: _Pill(label: 'Online', value: summary.onlineTime)),
+        Expanded(child: _Pill(label: l.online, value: summary.onlineTime)),
       ],
     );
   }

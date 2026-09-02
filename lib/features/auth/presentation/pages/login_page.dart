@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -41,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: AuthListener(
@@ -54,21 +56,21 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const BrandLogo(),
                   const SizedBox(height: 22),
-                  Text('Captain login', style: AppTextStyles.headline.copyWith(color: context.colors.onSurface, fontSize: 28)),
+                  Text(l.loginTitle, style: AppTextStyles.headline.copyWith(color: context.colors.onSurface, fontSize: 28)),
                   const SizedBox(height: 6),
-                  Text('Sign in to start driving.',
+                  Text(l.loginSubtitle,
                       style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark)),
                   const SizedBox(height: 26),
                   AppTextField(
-                    label: 'Email',
+                    label: l.emailLabel,
                     controller: _email,
-                    hintText: 'you@example.com',
+                    hintText: l.emailHint,
                     keyboardType: TextInputType.emailAddress,
                     prefix: const Icon(Icons.mail_outline_rounded, size: 19, color: AppColors.textMutedDark),
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
-                    label: 'Password',
+                    label: l.passwordLabel,
                     controller: _password,
                     obscureText: true,
                     prefix: const Icon(Icons.lock_outline_rounded, size: 19, color: AppColors.textMutedDark),
@@ -77,14 +79,14 @@ class _LoginPageState extends State<LoginPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push(AppRoutes.forgotPassword),
-                      child: Text('Forgot password?',
+                      child: Text(l.forgotPassword,
                           style: AppTextStyles.label.copyWith(color: AppColors.primary)),
                     ),
                   ),
                   const SizedBox(height: 6),
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) => AppButton(
-                      label: 'Log in',
+                      label: l.logIn,
                       isLoading: state.isLoading,
                       onPressed: _submit,
                     ),
@@ -93,11 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('New captain? ',
+                      Text(l.newCaptain,
                           style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark)),
                       GestureDetector(
                         onTap: () => context.push(AppRoutes.signup),
-                        child: Text('Register to drive',
+                        child: Text(l.registerToDrive,
                             style: AppTextStyles.body.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
                       ),
                     ],

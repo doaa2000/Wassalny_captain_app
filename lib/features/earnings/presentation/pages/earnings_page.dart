@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -22,12 +23,13 @@ class EarningsPage extends StatelessWidget {
         child: BlocBuilder<EarningsBloc, EarningsState>(
           builder: (context, state) {
             final report = state.report;
+            final l = AppLocalizations.of(context)!;
             return CustomScrollView(
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(22, 18, 22, 8),
                   sliver: SliverToBoxAdapter(
-                    child: Text('Earnings', style: AppTextStyles.title.copyWith(color: AppColors.textPrimaryDark)),
+                    child: Text(l.earningsTitle, style: AppTextStyles.title.copyWith(color: AppColors.textPrimaryDark)),
                   ),
                 ),
                 if (report == null)
@@ -40,10 +42,10 @@ class EarningsPage extends StatelessWidget {
                         SegmentedSelector<EarningsPeriod>(
                           value: state.period,
                           onChanged: (p) => context.read<EarningsBloc>().add(EarningsPeriodChanged(p)),
-                          segments: const [
-                            SegmentItem(value: EarningsPeriod.day, label: 'Day'),
-                            SegmentItem(value: EarningsPeriod.week, label: 'Week'),
-                            SegmentItem(value: EarningsPeriod.month, label: 'Month'),
+                          segments: [
+                            SegmentItem(value: EarningsPeriod.day, label: l.earningsDay),
+                            SegmentItem(value: EarningsPeriod.week, label: l.earningsWeek),
+                            SegmentItem(value: EarningsPeriod.month, label: l.earningsMonth),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -54,7 +56,7 @@ class EarningsPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('This week',
+                              Text(l.thisWeek,
                                   style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
                               const SizedBox(height: 16),
                               EarningsChart(bars: report.chart),
@@ -68,7 +70,7 @@ class EarningsPage extends StatelessWidget {
                               child: _MiniStatCard(
                                 icon: Icons.star_outline_rounded,
                                 iconColor: AppColors.success,
-                                label: 'Bonus earned',
+                                label: l.bonusEarned,
                                 value: report.bonusEarned,
                                 valueColor: AppColors.success,
                               ),
@@ -78,8 +80,8 @@ class EarningsPage extends StatelessWidget {
                               child: _MiniStatCard(
                                 icon: Icons.place_outlined,
                                 iconColor: AppColors.warning,
-                                label: 'Completed',
-                                value: '${report.trips} rides',
+                                label: l.completed,
+                                value: l.ridesCount(report.trips),
                               ),
                             ),
                           ],
@@ -105,6 +107,7 @@ class _TotalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return AppCard(
       radius: 22,
       borderColor: const Color(0xFF2A6B8A),
@@ -117,17 +120,17 @@ class _TotalCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Total earnings', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
+          Text(l.totalEarnings, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
           const SizedBox(height: 4),
           Text(report.total, style: AppTextStyles.amountLarge.copyWith(color: AppColors.primary)),
           const Divider(height: 28, color: AppColors.darkBorderSoft),
           Row(
             children: [
-              _stat('Trips', report.trips),
+              _stat(l.trips, report.trips),
               const SizedBox(width: 18),
-              _stat('Online', report.onlineHours),
+              _stat(l.online, report.onlineHours),
               const SizedBox(width: 18),
-              _stat('Avg / trip', report.averagePerTrip),
+              _stat(l.avgPerTrip, report.averagePerTrip),
             ],
           ),
         ],

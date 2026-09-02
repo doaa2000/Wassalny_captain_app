@@ -45,6 +45,7 @@ abstract final class AppConstants {
   static const String tableDriverLocations = 'driver_locations';
   static const String tableNotifications = 'notifications';
   static const String tablePayments = 'payments';
+  static const String tableRatings = 'ratings';
 
   // Trip status values (server-side enum public.trip_status).
   static const String tripStatusRequested = 'requested';

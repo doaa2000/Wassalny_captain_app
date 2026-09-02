@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   image_picker: ^1.1.2
 
   # State management
@@ -27,6 +29,7 @@ dependencies:
 
   # Backend (isolated inside the data layer only)
   supabase_flutter: ^2.5.6
+  firebase_core: ^4.13.0
 
   # Maps
   google_maps_flutter: ^2.9.0
@@ -34,6 +37,12 @@ dependencies:
 
   # Typography
   google_fonts: ^6.2.1
+
+  # Date/number formatting
+  intl: ^0.20.2
+
+  # Local settings persistence
+  shared_preferences: ^2.3.0
 
 dev_dependencies:
   flutter_test:

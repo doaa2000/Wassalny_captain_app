@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/dependency_injection/injection_container.dart';
 import '../../../../core/routes/app_routes.dart';
+import '../../../../core/services/locale_controller.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -20,11 +22,12 @@ class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   Future<void> _logout(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
     final bool confirmed = await AppDialog.confirm(
       context: context,
-      title: 'Log out?',
-      message: "You'll need to sign in again to go back online.",
-      confirmLabel: 'Log out',
+      title: l.logOutQuestion,
+      message: l.logOutMessage,
+      confirmLabel: l.logOut,
       destructive: true,
     );
     if (!confirmed || !context.mounted) return;
@@ -32,8 +35,35 @@ class ProfilePage extends StatelessWidget {
     context.go(AppRoutes.login);
   }
 
+  Future<void> _pickLanguage(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final LocaleController controller = sl<LocaleController>();
+    final Locale? selected = await showDialog<Locale>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l.languageLabel, style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimaryDark)),
+        backgroundColor: AppColors.darkSurfaceAlt,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(ctx).pop(const Locale('en')),
+            child: Text(l.english, style: AppTextStyles.body.copyWith(color: AppColors.textPrimaryDark)),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(ctx).pop(const Locale('ar')),
+            child: Text(l.arabic, style: AppTextStyles.body.copyWith(color: AppColors.textPrimaryDark)),
+          ),
+        ],
+      ),
+    );
+    if (selected != null && context.mounted) {
+      await controller.setLocale(selected);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: BlocBuilder<ProfileBloc, ProfileState>(
@@ -53,30 +83,47 @@ class ProfilePage extends StatelessWidget {
                       child: Column(
                         children: [
                           ProfileMenuTile(
+                            icon: Icons.edit_outlined,
+                            label: l.editProfileTitle,
+                            onTap: () async {
+                              await context.push(AppRoutes.editProfile);
+                              // Refresh so the header reflects any saved changes.
+                              if (context.mounted) {
+                                context.read<ProfileBloc>().add(const ProfileStarted());
+                              }
+                            },
+                          ),
+                          const Divider(height: 1, color: AppColors.darkDivider),
+                          ProfileMenuTile(
                             icon: Icons.directions_car_rounded,
-                            label: 'Vehicle management',
+                            label: l.vehicleManagement,
                             onTap: () => context.push(AppRoutes.vehicle),
                           ),
                           const Divider(height: 1, color: AppColors.darkDivider),
                           ProfileMenuTile(
                             icon: Icons.account_balance_wallet_rounded,
-                            label: 'Wallet & payouts',
+                            label: l.walletAndPayouts,
                             onTap: () => context.push(AppRoutes.wallet),
                           ),
                           const Divider(height: 1, color: AppColors.darkDivider),
-                          const ProfileMenuTile(
+                          ProfileMenuTile(
                             icon: Icons.description_outlined,
-                            label: 'Documents',
+                            label: l.documentsLabel,
                             showChevron: false,
-                            trailing: StatusBadge(label: 'Verified', color: AppColors.success),
+                            trailing: StatusBadge(label: l.verified, color: AppColors.success),
                           ),
                           const Divider(height: 1, color: AppColors.darkDivider),
-                          ProfileMenuTile(
-                            icon: Icons.language_rounded,
-                            label: 'Language',
-                            showChevron: false,
-                            trailing: Text('English',
-                                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMutedDark)),
+                          ListenableBuilder(
+                            listenable: sl<LocaleController>(),
+                            builder: (context, _) => ProfileMenuTile(
+                              icon: Icons.language_rounded,
+                              label: l.languageLabel,
+                              onTap: () => _pickLanguage(context),
+                              trailing: Text(
+                                sl<LocaleController>().isArabic ? l.arabic : l.english,
+                                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMutedDark),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -89,7 +136,7 @@ class ProfilePage extends StatelessWidget {
                           ProfileMenuTile(
                             icon: Icons.help_outline_rounded,
                             iconColor: AppColors.textSecondaryDark,
-                            label: 'Support center',
+                            label: l.supportCenter,
                             onTap: () => context.push(AppRoutes.support),
                           ),
                           const Divider(height: 1, color: AppColors.darkDivider),
@@ -97,7 +144,7 @@ class ProfilePage extends StatelessWidget {
                             icon: Icons.logout_rounded,
                             iconColor: AppColors.danger,
                             labelColor: AppColors.dangerSoft,
-                            label: 'Log out',
+                            label: l.logOut,
                             showChevron: false,
                             onTap: () => _logout(context),
                           ),
@@ -105,7 +152,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('${AppConstants.appName} · ${AppConstants.appVersion}',
+                    Text('${l.appName} · ${l.appVersion}',
                         style: AppTextStyles.caption.copyWith(color: AppColors.textFaintDark)),
                   ],
                 ),
@@ -158,11 +205,11 @@ class _ProfileHeader extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: [
-              Expanded(child: _StatBox(value: profile.totalTrips, label: 'Trips')),
+              Expanded(child: _StatBox(value: profile.totalTrips, label: AppLocalizations.of(context)!.trips)),
               const SizedBox(width: 10),
-              Expanded(child: _StatBox(value: profile.acceptanceRate, label: 'Acceptance', valueColor: AppColors.success)),
+              Expanded(child: _StatBox(value: profile.acceptanceRate, label: AppLocalizations.of(context)!.acceptance, valueColor: AppColors.success)),
               const SizedBox(width: 10),
-              Expanded(child: _StatBox(value: profile.completionRate, label: 'Completion')),
+              Expanded(child: _StatBox(value: profile.completionRate, label: AppLocalizations.of(context)!.completion)),
             ],
           ),
         ],

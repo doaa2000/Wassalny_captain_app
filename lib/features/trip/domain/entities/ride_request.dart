@@ -11,6 +11,7 @@ class RideRequest extends Equatable {
     required this.distance,
     required this.duration,
     required this.fare,
+    this.fareAmount,
     required this.pickupEtaMinutes,
     required this.pickupDistance,
     required this.passengerName,
@@ -34,6 +35,9 @@ class RideRequest extends Equatable {
 
   /// Captain fare/earnings, e.g. "EGP 96".
   final String fare;
+
+  /// Numeric fare in EGP as sent by the passenger, if known.
+  final double? fareAmount;
 
   final int pickupEtaMinutes;
   final String pickupDistance;

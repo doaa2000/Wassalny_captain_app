@@ -18,4 +18,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return const Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, CaptainProfile>> updateProfile({
+    required String name,
+    required String phone,
+  }) async {
+    try {
+      return Right(await _remote.updateProfile(name: name, phone: phone));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
 }

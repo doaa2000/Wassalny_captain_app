@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:wassalny_captain/l10n/app_localizations.dart';
+
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/trip_bloc.dart';
@@ -22,6 +24,7 @@ class TripFlowPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
+      resizeToAvoidBottomInset: true,
       body: BlocConsumer<TripBloc, TripState>(
         listenWhen: (prev, curr) =>
             prev.phase != curr.phase || prev.status != curr.status,
@@ -30,12 +33,13 @@ class TripFlowPage extends StatelessWidget {
             context.go(AppRoutes.dashboard);
           }
           if (state.phase == TripPhase.cancelledByRider) {
+            final l = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
-                const SnackBar(
+                SnackBar(
                   backgroundColor: AppColors.danger,
-                  content: Text('The rider cancelled this trip.'),
+                  content: Text(l.riderCancelled),
                 ),
               );
             context.go(AppRoutes.dashboard);

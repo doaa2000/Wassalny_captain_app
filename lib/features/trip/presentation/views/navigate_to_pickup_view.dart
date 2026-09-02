@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -19,6 +20,7 @@ class NavigateToPickupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Stack(
       children: [
         const Positioned.fill(child: MapView(variant: MapVariant.route)),
@@ -38,9 +40,9 @@ class NavigateToPickupView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Head to pickup', style: AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimaryDark)),
+                        Text(l.headToPickup, style: AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimaryDark)),
                         Text(
-                          '${request.pickup} · ${request.pickupDistance}',
+                          l.pickupWithDistance(request.pickupDistance, request.pickup),
                           style: AppTextStyles.caption.copyWith(color: AppColors.textSecondaryDark),
                         ),
                       ],
@@ -50,7 +52,7 @@ class NavigateToPickupView extends StatelessWidget {
                     children: [
                       Text('${request.pickupEtaMinutes}',
                           style: AppTextStyles.amountMedium.copyWith(color: AppColors.primary)),
-                      Text('MIN', style: AppTextStyles.micro.copyWith(color: AppColors.textMutedDark)),
+                      Text(l.min, style: AppTextStyles.micro.copyWith(color: AppColors.textMutedDark)),
                     ],
                   ),
                 ],
@@ -76,12 +78,12 @@ class NavigateToPickupView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 AppButton(
-                  label: "I've arrived at pickup",
+                  label: l.iveArrivedAtPickup,
                   onPressed: () => context.read<TripBloc>().add(const TripArrivedAtPickup()),
                 ),
                 const SizedBox(height: 9),
                 AppButton(
-                  label: 'Cancel trip',
+                  label: l.cancelTrip,
                   variant: AppButtonVariant.ghost,
                   height: 44,
                   onPressed: () => context.read<TripBloc>().add(const TripDeclined()),

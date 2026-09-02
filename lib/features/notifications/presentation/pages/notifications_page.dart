@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -25,32 +26,32 @@ class NotificationsPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
               children: [
                 PageHeader(
-                  title: 'Notifications',
+                  title: AppLocalizations.of(context)!.notificationsTitle,
                   trailing: TextButton(
                     onPressed: () => context.read<NotificationsBloc>().add(const NotificationsCleared()),
-                    child: Text('Clear all', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
+                    child: Text(AppLocalizations.of(context)!.clearAll, style: AppTextStyles.label.copyWith(color: AppColors.primary)),
                   ),
                 ),
                 const SizedBox(height: 10),
                 if (state.status == NotificationsStatus.loading)
                   const Padding(padding: EdgeInsets.only(top: 80), child: LoadingView())
                 else if (state.items.isEmpty)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 60),
                     child: EmptyView(
-                      title: "You're all caught up",
-                      message: 'New alerts about payouts and ratings show up here.',
+                      title: AppLocalizations.of(context)!.allCaughtUp,
+                      message: AppLocalizations.of(context)!.allCaughtUpSubtitle,
                       icon: Icons.notifications_none_rounded,
                     ),
                   )
                 else ...[
                   if (state.today.isNotEmpty) ...[
-                    const SectionHeader('Today'),
+                    SectionHeader(AppLocalizations.of(context)!.today),
                     _NotificationGroup(items: state.today),
                     const SizedBox(height: 20),
                   ],
                   if (state.earlier.isNotEmpty) ...[
-                    const SectionHeader('Earlier'),
+                    SectionHeader(AppLocalizations.of(context)!.earlier),
                     _NotificationGroup(items: state.earlier),
                   ],
                 ],

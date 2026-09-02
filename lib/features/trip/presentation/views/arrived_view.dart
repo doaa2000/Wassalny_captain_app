@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:wassalny_captain/l10n/app_localizations.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -18,6 +20,7 @@ class ArrivedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Stack(
       children: [
         const Positioned.fill(child: MapView(variant: MapVariant.route)),
@@ -35,7 +38,7 @@ class ArrivedView extends StatelessWidget {
                   border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
                 ),
                 child: Text(
-                  "You've arrived at pickup",
+                  l.arrivedAtPickup,
                   style: AppTextStyles.bodyStrong.copyWith(color: AppColors.success, fontWeight: FontWeight.w800),
                 ),
               ),
@@ -59,7 +62,7 @@ class ArrivedView extends StatelessWidget {
                     children: [
                       const Icon(Icons.timer_outlined, color: AppColors.warning, size: 20),
                       const SizedBox(width: 9),
-                      Text('Waiting time', style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
+                      Text(l.waitingTime, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
                       const Spacer(),
                       Text('2:14', style: AppTextStyles.statValue.copyWith(color: AppColors.warning)),
                     ],
@@ -68,12 +71,12 @@ class ArrivedView extends StatelessWidget {
                 const SizedBox(height: 14),
                 PassengerTile(
                   request: request,
-                  subtitle: 'Meeting at ${request.pickup}',
+                  subtitle: l.meetingAt(request.pickup),
                   trailing: const [SizedBox(width: 8), CircleActionButton(icon: Icons.call_rounded, filled: true)],
                 ),
                 const SizedBox(height: 16),
                 AppButton(
-                  label: 'Start trip',
+                  label: l.startTrip,
                   variant: AppButtonVariant.success,
                   onPressed: () => context.read<TripBloc>().add(const TripStarted()),
                 ),

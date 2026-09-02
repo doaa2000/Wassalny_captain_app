@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'app_button.dart';
@@ -12,10 +13,13 @@ abstract final class AppDialog {
     required BuildContext context,
     required String title,
     required String message,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
+    String? confirmLabel,
+    String? cancelLabel,
     bool destructive = false,
   }) async {
+    final l = AppLocalizations.of(context);
+    final String confirmText = confirmLabel ?? l?.confirm ?? 'Confirm';
+    final String cancelText = cancelLabel ?? l?.cancel ?? 'Cancel';
     final bool? result = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -32,14 +36,14 @@ abstract final class AppDialog {
               Text(message, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
               const SizedBox(height: 22),
               AppButton(
-                label: confirmLabel,
+                label: confirmText,
                 variant: destructive ? AppButtonVariant.danger : AppButtonVariant.primary,
                 height: 50,
                 onPressed: () => Navigator.of(ctx).pop(true),
               ),
               const SizedBox(height: 10),
               AppButton(
-                label: cancelLabel,
+                label: cancelText,
                 variant: AppButtonVariant.ghost,
                 height: 46,
                 onPressed: () => Navigator.of(ctx).pop(false),

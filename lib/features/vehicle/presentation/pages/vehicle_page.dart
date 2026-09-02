@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -26,7 +27,7 @@ class VehiclePage extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
               children: [
-                PageHeader(title: 'My vehicle', showBack: true, onBack: () => context.pop(), fontSize: 22),
+                PageHeader(title: AppLocalizations.of(context)!.vehicleTitle, showBack: true, onBack: () => context.pop(), fontSize: 22),
                 const SizedBox(height: 14),
                 if (vehicle == null)
                   const Padding(padding: EdgeInsets.only(top: 80), child: LoadingView())
@@ -35,13 +36,13 @@ class VehiclePage extends StatelessWidget {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      Expanded(child: _InfoCard(label: 'Plate number', value: vehicle.plate)),
+                      Expanded(child: _InfoCard(label: AppLocalizations.of(context)!.plateNumberTitle, value: vehicle.plate)),
                       const SizedBox(width: 12),
-                      Expanded(child: _InfoCard(label: 'Service tier', value: vehicle.serviceTier, valueColor: AppColors.primary)),
+                      Expanded(child: _InfoCard(label: AppLocalizations.of(context)!.serviceTierTitle, value: vehicle.serviceTier, valueColor: AppColors.primary)),
                     ],
                   ),
                   const SizedBox(height: 22),
-                  Text('Documents & insurance',
+                  Text(AppLocalizations.of(context)!.documentsInsurance,
                       style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
                   const SizedBox(height: 10),
                   AppCard(
@@ -90,7 +91,7 @@ class _VehicleHeroCard extends StatelessWidget {
           Text(vehicle.specs, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark)),
           const SizedBox(height: 12),
           if (vehicle.approved)
-            const StatusBadge(label: 'Active & approved', color: AppColors.success, showDot: true),
+            StatusBadge(label: AppLocalizations.of(context)!.activeApproved, color: AppColors.success, showDot: true),
         ],
       ),
     );
@@ -127,10 +128,11 @@ class _DocumentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final (Color color, IconData icon, String label) = switch (document.status) {
-      DocumentStatus.valid => (AppColors.success, Icons.check_rounded, 'Valid'),
-      DocumentStatus.renewSoon => (AppColors.warning, Icons.schedule_rounded, 'Renew soon'),
-      DocumentStatus.passed => (AppColors.success, Icons.check_rounded, 'Passed'),
+      DocumentStatus.valid => (AppColors.success, Icons.check_rounded, l.docValid),
+      DocumentStatus.renewSoon => (AppColors.warning, Icons.schedule_rounded, l.docRenewSoon),
+      DocumentStatus.passed => (AppColors.success, Icons.check_rounded, l.docPassed),
     };
 
     return Padding(
