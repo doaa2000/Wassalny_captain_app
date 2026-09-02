@@ -27,7 +27,13 @@ class _TripCountdownTicked extends TripEvent {
 }
 
 class TripAccepted extends TripEvent {
-  const TripAccepted();
+  const TripAccepted({this.offeredFare});
+
+  /// Captain's fare when they change the passenger's price. Null keeps original.
+  final double? offeredFare;
+
+  @override
+  List<Object?> get props => [offeredFare];
 }
 
 class TripDeclined extends TripEvent {

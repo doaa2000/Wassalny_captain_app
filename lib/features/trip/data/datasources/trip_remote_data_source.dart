@@ -12,7 +12,7 @@ abstract interface class TripRemoteDataSource {
   /// `requested` trips and updates whenever one is added/changed.
   Stream<List<RideRequestModel>> watchNearbyRequests();
 
-  Future<RideRequestModel> acceptRequest(String requestId);
+  Future<RideRequestModel> acceptRequest(String requestId, {double? offeredFare});
   Future<void> declineRequest(String requestId);
   Future<void> markArrived(String requestId);
   Future<void> startTrip(String requestId);

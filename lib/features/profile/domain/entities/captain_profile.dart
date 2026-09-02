@@ -11,6 +11,7 @@ class CaptainProfile extends Equatable {
     required this.totalTrips,
     required this.acceptanceRate,
     required this.completionRate,
+    this.phone = '',
   });
 
   final String name;
@@ -21,8 +22,9 @@ class CaptainProfile extends Equatable {
   final String totalTrips;
   final String acceptanceRate;
   final String completionRate;
+  final String phone;
 
   @override
   List<Object?> get props =>
-      [name, initials, memberSince, rating, totalTrips, acceptanceRate, completionRate];
+      [name, initials, memberSince, rating, totalTrips, acceptanceRate, completionRate, phone];
 }

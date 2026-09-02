@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -23,22 +24,33 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  // ---------------------------------------------------------------------------
+  // Controllers
+  // ---------------------------------------------------------------------------
+
+  // Step 1
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
+  // Step 2
   final TextEditingController _nationalId = TextEditingController();
   final TextEditingController _license = TextEditingController();
-
   final TextEditingController _model = TextEditingController();
   final TextEditingController _year = TextEditingController();
   final TextEditingController _plate = TextEditingController();
+
+  // Current step
+  int _currentStep = 0;
 
   @override
   void dispose() {
     _name.dispose();
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
+
     _nationalId.dispose();
     _license.dispose();
     _model.dispose();
@@ -48,44 +60,128 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  void _submit() {
-    final name = _name.text.trim();
-    final email = _email.text.trim();
-    final password = _password.text;
-    final nationalId = _nationalId.text.trim();
-    final licenseNumber = _license.text.trim();
+  // ---------------------------------------------------------------------------
+  // Navigation
+  // ---------------------------------------------------------------------------
 
-    if (name.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        nationalId.isEmpty ||
-        licenseNumber.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please complete all required account and driver fields.'),
-        ),
-      );
+  void _nextStep() {
+    if (!_validateCurrentStep()) return;
+
+    if (_currentStep < 2) {
+      setState(() {
+        _currentStep++;
+      });
+    }
+  }
+
+  void _previousStep() {
+    if (_currentStep == 0) {
+      context.pop();
       return;
     }
 
+    setState(() {
+      _currentStep--;
+    });
+  }
+
+  bool _validateCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _validateAccountStep();
+
+      case 1:
+        return _validateDriverStep();
+
+      case 2:
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+  bool _validateAccountStep() {
+    final l = AppLocalizations.of(context)!;
+    if (_name.text.trim().isEmpty ||
+        _email.text.trim().isEmpty ||
+        _password.text.isEmpty ||
+        _confirmPassword.text.isEmpty) {
+      _showMessage(l.fieldRequired);
+      return false;
+    }
+
+    if (!_email.text.contains('@')) {
+      _showMessage(l.invalidEmail);
+      return false;
+    }
+
+    if (_password.text.length < 8) {
+      _showMessage(l.passwordTooShort);
+      return false;
+    }
+
+    if (_password.text != _confirmPassword.text) {
+      _showMessage(l.passwordMismatch);
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateDriverStep() {
+    final l = AppLocalizations.of(context)!;
+    if (_nationalId.text.trim().isEmpty ||
+        _license.text.trim().isEmpty ||
+        _model.text.trim().isEmpty ||
+        _year.text.trim().isEmpty ||
+        _plate.text.trim().isEmpty) {
+      _showMessage(l.driverFieldsRequired);
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Final Submit
+  // ---------------------------------------------------------------------------
+
+  void _submit() {
     context.read<AuthBloc>().add(
           AuthRegisterSubmitted(
-            name: name,
-            email: email,
-            password: password,
-            nationalId: nationalId,
-            licenseNumber: licenseNumber,
+            name: _name.text.trim(),
+            email: _email.text.trim(),
+            password: _password.text,
+            nationalId: _nationalId.text.trim(),
+            licenseNumber: _license.text.trim(),
           ),
         );
   }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: AuthListener(
-        // Email/password registration does not use OTP.
+        // No OTP anymore.
+        // We will later replace this with the proper pending/approval flow.
         onRegistered: () => context.go(AppRoutes.login),
+
         child: SafeArea(
           child: ResponsiveCenter(
             child: Column(
@@ -96,54 +192,7 @@ class _SignupPageState extends State<SignupPage> {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(22, 20, 22, 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildAccountSection(context),
-
-                        const SizedBox(height: 28),
-
-                        _buildDriverSection(context),
-
-                        const SizedBox(height: 28),
-
-                        _buildVehicleSection(context),
-
-                        const SizedBox(height: 28),
-
-                        _buildDocumentsSection(context),
-
-                        const SizedBox(height: 28),
-
-                        _buildApprovalNotice(context),
-
-                        const SizedBox(height: 24),
-
-                        BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) {
-                            return AppButton(
-                              label: 'Submit application',
-                              isLoading: state.isLoading,
-                              onPressed: state.isLoading ? null : _submit,
-                            );
-                          },
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Center(
-                          child: TextButton(
-                            onPressed: () => context.go(AppRoutes.login),
-                            child: Text(
-                              'Already have an account? Sign in',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: _buildCurrentStep(context),
                   ),
                 ),
               ],
@@ -154,7 +203,12 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Header
+  // ---------------------------------------------------------------------------
+
   Widget _buildHeader(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
       child: Column(
@@ -163,12 +217,12 @@ class _SignupPageState extends State<SignupPage> {
           Row(
             children: [
               AppBackButton(
-                onPressed: () => context.pop(),
+                onPressed: _previousStep,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Become a captain',
+                  l.signupTitle,
                   style: AppTextStyles.titleSmall.copyWith(
                     color: context.colors.onSurface,
                   ),
@@ -177,45 +231,65 @@ class _SignupPageState extends State<SignupPage> {
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
 
-          const _StepProgress(
-            activeSteps: 1,
-            totalSteps: 1,
+          _StepProgress(
+            currentStep: _currentStep,
+            totalSteps: 3,
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
 
-          Text(
-            'Create your captain account',
-            style: AppTextStyles.titleSmall.copyWith(
-              color: context.colors.onSurface,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            'Enter your information and submit your application for review.',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: context.colors.onSurface.withValues(alpha: 0.65),
-            ),
-          ),
+          const _StepLabels(),
         ],
       ),
     );
   }
 
-  Widget _buildAccountSection(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Current Step
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCurrentStep(BuildContext context) {
+    switch (_currentStep) {
+      case 0:
+        return _buildAccountStep(context);
+
+      case 1:
+        return _buildDriverStep(context);
+
+      case 2:
+        return _buildDocumentsStep(context);
+
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // STEP 1 - ACCOUNT
+  // ---------------------------------------------------------------------------
+
+  Widget _buildAccountStep(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader('Account information'),
+        SectionHeader(l.signupAccountInfo),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
+
+        Text(
+          l.signupAccountInfoSubtitle,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: context.colors.onSurface.withValues(alpha: 0.65),
+          ),
+        ),
+
+        const SizedBox(height: 22),
 
         _FieldLabel(
-          label: 'Full name',
+          label: l.fullNameLabel,
           required: true,
         ),
 
@@ -225,10 +299,10 @@ class _SignupPageState extends State<SignupPage> {
           controller: _name,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
         _FieldLabel(
-          label: 'Email address',
+          label: l.emailAddressLabel,
           required: true,
         ),
 
@@ -241,13 +315,13 @@ class _SignupPageState extends State<SignupPage> {
         const SizedBox(height: 5),
 
         _FieldHint(
-          text: 'Use an email address you can access.',
+          text: l.emailHintSignup,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
         _FieldLabel(
-          label: 'Password',
+          label: l.passwordLabel,
           required: true,
         ),
 
@@ -260,22 +334,53 @@ class _SignupPageState extends State<SignupPage> {
         const SizedBox(height: 5),
 
         _FieldHint(
-          text: 'Choose a strong password with at least 8 characters.',
+          text: l.passwordHintSignup,
         ),
+
+        const SizedBox(height: 18),
+
+        _FieldLabel(
+          label: l.confirmPasswordLabel,
+          required: true,
+        ),
+
+        const SizedBox(height: 7),
+
+        AppTextField(
+          controller: _confirmPassword,
+        ),
+
+        const SizedBox(height: 30),
+
+        _buildContinueButton(context),
       ],
     );
   }
 
-  Widget _buildDriverSection(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // STEP 2 - DRIVER & VEHICLE
+  // ---------------------------------------------------------------------------
+
+  Widget _buildDriverStep(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader('Driver information'),
+        SectionHeader(l.driverInfoTitle),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
+
+        Text(
+          l.driverInfoSubtitle,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: context.colors.onSurface.withValues(alpha: 0.65),
+          ),
+        ),
+
+        const SizedBox(height: 22),
 
         _FieldLabel(
-          label: 'National ID',
+          label: l.nationalIdLabel,
           required: true,
         ),
 
@@ -285,10 +390,10 @@ class _SignupPageState extends State<SignupPage> {
           controller: _nationalId,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
         _FieldLabel(
-          label: 'Driving license number',
+          label: l.licenseNumberLabel,
           required: true,
         ),
 
@@ -297,17 +402,12 @@ class _SignupPageState extends State<SignupPage> {
         AppTextField(
           controller: _license,
         ),
-      ],
-    );
-  }
 
-  Widget _buildVehicleSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SectionHeader('Vehicle information'),
+        const SizedBox(height: 30),
 
-        const SizedBox(height: 14),
+        SectionHeader(l.vehicleInfoTitle),
+
+        const SizedBox(height: 18),
 
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,7 +417,7 @@ class _SignupPageState extends State<SignupPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _FieldLabel(
-                    label: 'Vehicle model',
+                    label: l.vehicleModelLabel,
                     required: true,
                   ),
                   const SizedBox(height: 7),
@@ -336,7 +436,7 @@ class _SignupPageState extends State<SignupPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _FieldLabel(
-                    label: 'Year',
+                    label: l.yearLabel,
                     required: true,
                   ),
                   const SizedBox(height: 7),
@@ -349,10 +449,10 @@ class _SignupPageState extends State<SignupPage> {
           ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
         _FieldLabel(
-          label: 'Plate number',
+          label: l.plateNumberLabel,
           required: true,
         ),
 
@@ -361,66 +461,156 @@ class _SignupPageState extends State<SignupPage> {
         AppTextField(
           controller: _plate,
         ),
+
+        const SizedBox(height: 30),
+
+        _buildNavigationButtons(context),
       ],
     );
   }
 
-  Widget _buildDocumentsSection(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // STEP 3 - DOCUMENTS
+  // ---------------------------------------------------------------------------
+
+  Widget _buildDocumentsStep(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader('Documents'),
+        SectionHeader(l.requiredDocumentsTitle),
 
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
         Text(
-          'Upload clear photos of your required documents.',
+          l.requiredDocumentsSubtitle,
           style: AppTextStyles.bodySmall.copyWith(
             color: context.colors.onSurface.withValues(alpha: 0.65),
           ),
         ),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 22),
 
-        const Row(
+        _DocumentRequirement(
+          title: l.drivingLicense,
+          description: l.drivingLicenseDesc,
+        ),
+
+        const SizedBox(height: 12),
+
+        _DocumentRequirement(
+          title: l.vehicleRegistration,
+          description: l.vehicleRegistrationDesc,
+        ),
+
+        const SizedBox(height: 12),
+
+        _DocumentRequirement(
+          title: l.insurance,
+          description: l.insuranceDesc,
+        ),
+
+        const SizedBox(height: 20),
+
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: DocumentTile(
-                label: 'License',
+                label: l.drivingLicense,
                 uploaded: false,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: DocumentTile(
-                label: 'Vehicle reg.',
+                label: l.vehicleRegistration,
                 uploaded: false,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: DocumentTile(
-                label: 'Insurance',
+                label: l.insurance,
                 uploaded: false,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 28),
 
-        Text(
-          'Document upload will be required before your application can be approved.',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: context.colors.onSurface.withValues(alpha: 0.55),
+        _buildApprovalNotice(context),
+
+        const SizedBox(height: 28),
+
+        BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppButton(
+                  label: l.submitApplication,
+                  isLoading: state.isLoading,
+                  onPressed: state.isLoading ? null : _submit,
+                ),
+
+                const SizedBox(height: 12),
+
+                TextButton(
+                  onPressed: _previousStep,
+                  child: Text(l.back),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Buttons
+  // ---------------------------------------------------------------------------
+
+  Widget _buildContinueButton(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return AppButton(
+      label: l.continueLabel,
+      onPressed: _nextStep,
+    );
+  }
+
+  Widget _buildNavigationButtons(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _previousStep,
+            child: Text(l.back),
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          flex: 2,
+          child: AppButton(
+            label: l.continueLabel,
+            onPressed: _nextStep,
           ),
         ),
       ],
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Approval Notice
+  // ---------------------------------------------------------------------------
+
   Widget _buildApprovalNotice(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -446,14 +636,14 @@ class _SignupPageState extends State<SignupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Application review',
-                
+                  l.applicationReview,
+                 
                 ),
 
                 const SizedBox(height: 5),
 
                 Text(
-                  'After registration, your account will remain pending until an admin reviews and approves your driver information.',
+                  l.applicationReviewBody,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: context.colors.onSurface.withValues(
                       alpha: 0.65,
@@ -468,6 +658,10 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 }
+
+// =============================================================================
+// FIELD LABEL
+// =============================================================================
 
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel({
@@ -504,6 +698,10 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
+// =============================================================================
+// FIELD HINT
+// =============================================================================
+
 class _FieldHint extends StatelessWidget {
   const _FieldHint({
     required this.text,
@@ -523,13 +721,70 @@ class _FieldHint extends StatelessWidget {
   }
 }
 
+// =============================================================================
+// DOCUMENT REQUIREMENT
+// =============================================================================
+
+class _DocumentRequirement extends StatelessWidget {
+  const _DocumentRequirement({
+    required this.title,
+    required this.description,
+  });
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.check_circle_outline,
+          size: 19,
+          color: AppColors.primary,
+        ),
+
+        const SizedBox(width: 10),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+               
+              ),
+
+              const SizedBox(height: 3),
+
+              Text(
+                description,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: context.colors.onSurface.withValues(
+                    alpha: 0.55,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// STEP PROGRESS
+// =============================================================================
+
 class _StepProgress extends StatelessWidget {
   const _StepProgress({
-    required this.activeSteps,
+    required this.currentStep,
     required this.totalSteps,
   });
 
-  final int activeSteps;
+  final int currentStep;
   final int totalSteps;
 
   @override
@@ -537,15 +792,17 @@ class _StepProgress extends StatelessWidget {
     return Row(
       children: List.generate(
         totalSteps,
-        (i) {
+        (index) {
+          final bool active = index <= currentStep;
+
           return Expanded(
             child: Container(
               height: 5,
               margin: EdgeInsets.only(
-                right: i == totalSteps - 1 ? 0 : 7,
+                right: index == totalSteps - 1 ? 0 : 7,
               ),
               decoration: BoxDecoration(
-                color: i < activeSteps
+                color: active
                     ? AppColors.primary
                     : AppColors.darkTrack,
                 borderRadius: BorderRadius.circular(3),
@@ -554,6 +811,41 @@ class _StepProgress extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+// =============================================================================
+// STEP LABELS
+// =============================================================================
+
+class _StepLabels extends StatelessWidget {
+  const _StepLabels();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            l.accountStep,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            l.driverStep,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            l.documentsStep,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
     );
   }
 }

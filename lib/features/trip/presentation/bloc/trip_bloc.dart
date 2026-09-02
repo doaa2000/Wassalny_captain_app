@@ -83,7 +83,9 @@ class TripBloc extends Bloc<TripEvent, TripState> {
     if (request == null) return;
 
     emit(state.copyWith(status: TripStatus.processing));
-    final result = await _acceptRequest(request.id);
+    final result = await _acceptRequest(
+      AcceptRequestParams(requestId: request.id, offeredFare: event.offeredFare),
+    );
     result.fold(
       (failure) => emit(state.copyWith(status: TripStatus.failure, errorMessage: failure.message)),
       (accepted) {

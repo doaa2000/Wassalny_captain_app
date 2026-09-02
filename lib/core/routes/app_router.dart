@@ -16,6 +16,7 @@ import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/splash/presentation/cubit/splash_cubit.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
@@ -151,6 +152,14 @@ abstract final class AppRouter {
         builder: (_, __) => BlocProvider(
           create: (_) => sl<SupportCubit>()..load(),
           child: const SupportPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => BlocProvider(
+          create: (_) => sl<ProfileBloc>()..add(const ProfileStarted()),
+          child: const EditProfilePage(),
         ),
       ),
     ],

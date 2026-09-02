@@ -12,6 +12,7 @@ class RideRequestModel extends RideRequest {
     required super.distance,
     required super.duration,
     required super.fare,
+    super.fareAmount,
     required super.pickupEtaMinutes,
     required super.pickupDistance,
     required super.passengerName,
@@ -29,6 +30,7 @@ class RideRequestModel extends RideRequest {
       distance: json['distance'] as String? ?? '',
       duration: json['duration'] as String? ?? '',
       fare: json['fare'] as String? ?? '',
+      fareAmount: (json['trip_price'] as num?)?.toDouble() ?? _amountFromFare(json['fare'] as String?),
       pickupEtaMinutes: (json['pickup_eta'] as num?)?.toInt() ?? 0,
       pickupDistance: json['pickup_distance'] as String? ?? '',
       passengerName: json['passenger_name'] as String? ?? '',
@@ -74,6 +76,7 @@ class RideRequestModel extends RideRequest {
       distance: dist != null ? '$dist km' : '',
       duration: dur != null ? '$dur min' : '',
       fare: price != null ? 'EGP ${price.toStringAsFixed(0)}' : 'EGP —',
+      fareAmount: price?.toDouble(),
       pickupEtaMinutes: (json['pickup_eta'] as num?)?.toInt() ?? 0,
       pickupDistance: json['pickup_distance'] as String? ?? '',
       passengerName: name,
@@ -91,4 +94,32 @@ class RideRequestModel extends RideRequest {
   }
 
   RideRequest toEntity() => this;
+
+  RideRequestModel copyWith({
+    String? fare,
+    double? fareAmount,
+  }) {
+    return RideRequestModel(
+      id: id,
+      tier: tier,
+      pickup: pickup,
+      dropoff: dropoff,
+      distance: distance,
+      duration: duration,
+      fare: fare ?? this.fare,
+      fareAmount: fareAmount ?? this.fareAmount,
+      pickupEtaMinutes: pickupEtaMinutes,
+      pickupDistance: pickupDistance,
+      passengerName: passengerName,
+      passengerInitials: passengerInitials,
+      passengerRating: passengerRating,
+      paymentMethod: paymentMethod,
+    );
+  }
+
+  static double? _amountFromFare(String? fare) {
+    if (fare == null) return null;
+    final Match? match = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(fare);
+    return match == null ? null : double.tryParse(match.group(1)!);
+  }
 }

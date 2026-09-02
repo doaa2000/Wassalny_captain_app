@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -18,15 +19,17 @@ class AppBottomNavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
 
   static const List<BottomNavItem> items = [
-    BottomNavItem(icon: Icons.home_rounded, label: 'Home'),
-    BottomNavItem(icon: Icons.bar_chart_rounded, label: 'Earnings'),
-    BottomNavItem(icon: Icons.receipt_long_rounded, label: 'History'),
-    BottomNavItem(icon: Icons.notifications_none_rounded, label: 'Alerts'),
-    BottomNavItem(icon: Icons.person_outline_rounded, label: 'Profile'),
+    BottomNavItem(icon: Icons.home_rounded, label: ''),
+    BottomNavItem(icon: Icons.bar_chart_rounded, label: ''),
+    BottomNavItem(icon: Icons.receipt_long_rounded, label: ''),
+    BottomNavItem(icon: Icons.notifications_none_rounded, label: ''),
+    BottomNavItem(icon: Icons.person_outline_rounded, label: ''),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final labels = [l.home, l.earnings, l.history, l.alerts, l.profile];
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.darkSurfaceAlt,
@@ -53,7 +56,7 @@ class AppBottomNavBar extends StatelessWidget {
                         Icon(items[i].icon, color: color, size: 23),
                         const SizedBox(height: 4),
                         Text(
-                          items[i].label,
+                          labels[i],
                           style: AppTextStyles.micro.copyWith(
                             color: color,
                             fontWeight: active ? FontWeight.w700 : FontWeight.w600,

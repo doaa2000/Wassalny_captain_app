@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -26,6 +27,7 @@ class _OtpPageState extends State<OtpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: AuthListener(
@@ -49,12 +51,12 @@ class _OtpPageState extends State<OtpPage> {
                     child: const Icon(Icons.dialpad_rounded, color: AppColors.primary, size: 30),
                   ),
                   const SizedBox(height: 20),
-                  Text('Verify your number',
+                  Text(l.verifyTitle,
                       style: AppTextStyles.headline.copyWith(color: context.colors.onSurface)),
                   const SizedBox(height: 8),
                   Text.rich(
                     TextSpan(
-                      text: 'Enter the 4-digit code sent to\n',
+                      text: '${l.verifySubtitle}\n',
                       style: AppTextStyles.body.copyWith(color: AppColors.textSecondaryDark, height: 1.5),
                       children: [
                         TextSpan(
@@ -69,11 +71,11 @@ class _OtpPageState extends State<OtpPage> {
                   const SizedBox(height: 24),
                   Text.rich(
                     TextSpan(
-                      text: "Didn't get a code? ",
+                      text: l.didntGetCode,
                       style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark),
                       children: [
                         TextSpan(
-                          text: 'Resend in 0:28',
+                          text: l.resendIn('0:28'),
                           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMutedDark, fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -82,7 +84,7 @@ class _OtpPageState extends State<OtpPage> {
                   const Spacer(),
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) => AppButton(
-                      label: 'Verify & start',
+                      label: l.verifyAndStart,
                       isLoading: state.isLoading,
                       onPressed: () => context
                           .read<AuthBloc>()

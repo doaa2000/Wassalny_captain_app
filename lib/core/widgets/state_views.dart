@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../extensions/context_extensions.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
@@ -91,7 +92,12 @@ class ErrorView extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 18),
-              AppButton(label: 'Try again', onPressed: onRetry, expand: false, height: 48),
+              AppButton(
+                label: AppLocalizations.of(context)?.tryAgain ?? 'Try again',
+                onPressed: onRetry,
+                expand: false,
+                height: 48,
+              ),
             ],
           ],
         ),

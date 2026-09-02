@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -23,6 +24,7 @@ class TripCompletedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       color: AppColors.darkBackground,
       child: ListView(
@@ -46,11 +48,11 @@ class TripCompletedView extends StatelessWidget {
                   child: const Icon(Icons.check_rounded, color: AppColors.white, size: 34),
                 ),
                 const SizedBox(height: 14),
-                Text('You earned',
+                Text(l.youEarned,
                     style: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.85))),
                 const SizedBox(height: 2),
                 Text(fare.total, style: AppTextStyles.amountLarge.copyWith(color: AppColors.white, fontSize: 42)),
-                Text("Added to today's earnings",
+                Text(l.addedToToday,
                     style: AppTextStyles.caption.copyWith(color: Colors.white.withValues(alpha: 0.8))),
               ],
             ),
@@ -64,11 +66,11 @@ class TripCompletedView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _metric(fare.distance.replaceAll(' km', ''), 'km'),
+                      _metric(fare.distance.replaceAll(' km', ''), l.kmUnit),
                       _divider(),
-                      _metric(fare.duration.replaceAll(' min', ''), 'min'),
+                      _metric(fare.duration.replaceAll(' min', ''), l.minUnit),
                       _divider(),
-                      _metric(fare.paymentMethod, 'payment', color: AppColors.success),
+                      _metric(fare.paymentMethod, l.paymentLabel, color: AppColors.success),
                     ],
                   ),
                 ),
@@ -86,9 +88,9 @@ class TripCompletedView extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _routeStop('PICKUP', request.pickup),
+                                  _routeStop(l.pickupLabel, request.pickup),
                                   const SizedBox(height: 12),
-                                  _routeStop('DROP-OFF', request.dropoff),
+                                  _routeStop(l.dropoffLabel, request.dropoff),
                                 ],
                               ),
                             ),
@@ -96,15 +98,15 @@ class TripCompletedView extends StatelessWidget {
                         ),
                       ),
                       const Divider(height: 28, color: AppColors.darkBorderSoft),
-                      _row('Trip fare', fare.tripFare, AppColors.textPrimaryDark),
+                      _row(l.tripFare, fare.tripFare, AppColors.textPrimaryDark),
                       const SizedBox(height: 8),
-                      _row('Service fee (–8%)', fare.serviceFee, AppColors.dangerSoft),
+                      _row(l.serviceFee, fare.serviceFee, AppColors.dangerSoft),
                       const SizedBox(height: 8),
-                      _row('Peak bonus', fare.peakBonus, AppColors.success),
+                      _row(l.peakBonus, fare.peakBonus, AppColors.success),
                       const Divider(height: 24, color: AppColors.darkBorderSoft),
                       Row(
                         children: [
-                          Text('Your earnings',
+                          Text(l.yourEarnings,
                               style: AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimaryDark)),
                           const Spacer(),
                           Text(fare.total, style: AppTextStyles.amountMedium.copyWith(color: AppColors.success)),
@@ -114,7 +116,7 @@ class TripCompletedView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 18),
-                AppButton(label: 'Find next ride', onPressed: onFindNext),
+                AppButton(label: l.findNextRide, onPressed: onFindNext),
               ],
             ),
           ),

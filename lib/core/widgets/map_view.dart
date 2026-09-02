@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import 'map_style.dart';
 
@@ -39,19 +40,20 @@ class _MapViewState extends State<MapView> {
   LatLng get _dropoff => widget.dropoff ?? _defaultDropoff;
   bool get _showRoute => widget.variant != MapVariant.idle;
 
-  Set<Marker> _markers() {
+  Set<Marker> _markers(BuildContext context) {
     if (!_showRoute) return const {};
+    final l = AppLocalizations.of(context);
     return {
       Marker(
         markerId: const MarkerId('pickup'),
         position: _pickup,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: const InfoWindow(title: 'Pickup'),
+        infoWindow: InfoWindow(title: l?.pickup ?? 'Pickup'),
       ),
       Marker(
         markerId: const MarkerId('dropoff'),
         position: _dropoff,
-        infoWindow: const InfoWindow(title: 'Drop-off'),
+        infoWindow: InfoWindow(title: l?.dropoff ?? 'Drop-off'),
       ),
     };
   }
@@ -109,7 +111,7 @@ class _MapViewState extends State<MapView> {
       initialCameraPosition: _initialCamera,
       onMapCreated: _onMapCreated,
       style: captainMapStyle,
-      markers: _markers(),
+      markers: _markers(context),
       polylines: _polylines(),
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,

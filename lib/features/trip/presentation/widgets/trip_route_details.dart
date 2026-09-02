@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -21,6 +22,7 @@ class TripRouteDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -31,9 +33,9 @@ class TripRouteDetails extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _stop(pickupLabel ?? 'PICKUP', pickup),
+                _stop(pickupLabel ?? l.pickupLabel, pickup),
                 const SizedBox(height: 12),
-                _stop(dropoffLabel ?? 'DROP-OFF', dropoff),
+                _stop(dropoffLabel ?? l.dropoffLabel, dropoff),
               ],
             ),
           ),

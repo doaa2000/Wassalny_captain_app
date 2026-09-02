@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -31,7 +32,7 @@ class NearbyRequestCard extends StatelessWidget {
               children: [
                 StatusBadge(label: request.tier, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text('${request.pickupEtaMinutes} min away',
+                Text(AppLocalizations.of(context)!.minAway(request.pickupEtaMinutes),
                     style: AppTextStyles.caption.copyWith(color: AppColors.textSecondaryDark)),
                 const Spacer(),
                 Text(request.fare, style: AppTextStyles.statValue.copyWith(color: AppColors.success)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -18,6 +19,7 @@ class HistoryPage extends StatelessWidget {
         bottom: false,
         child: BlocBuilder<HistoryBloc, HistoryState>(
           builder: (context, state) {
+            final l = AppLocalizations.of(context)!;
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
@@ -26,7 +28,7 @@ class HistoryPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Trip history', style: AppTextStyles.title.copyWith(color: AppColors.textPrimaryDark)),
+                        Text(l.tripHistoryTitle, style: AppTextStyles.title.copyWith(color: AppColors.textPrimaryDark)),
                         const SizedBox(height: 14),
                         const _SearchBar(),
                         const SizedBox(height: 12),
@@ -38,9 +40,9 @@ class HistoryPage extends StatelessWidget {
                 if (state.status == HistoryStatus.loading || state.status == HistoryStatus.initial)
                   const SliverFillRemaining(hasScrollBody: false, child: LoadingView())
                 else if (state.items.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     hasScrollBody: false,
-                    child: EmptyView(title: 'No trips yet', message: 'Completed rides will appear here.'),
+                    child: EmptyView(title: l.noTripsYet, message: l.noTripsSubtitle),
                   )
                 else
                   SliverPadding(
@@ -82,7 +84,7 @@ class _SearchBar extends StatelessWidget {
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
-                hintText: 'Search trips',
+                hintText: AppLocalizations.of(context)!.searchTrips,
                 hintStyle: AppTextStyles.body.copyWith(color: AppColors.textMutedDark),
               ),
             ),
@@ -99,7 +101,8 @@ class _FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> labels = ['All', 'Today', 'This week'];
+    final l = AppLocalizations.of(context)!;
+    final List<String> labels = [l.filterAll, l.filterToday, l.filterThisWeek];
     return Row(
       children: List.generate(labels.length, (i) {
         final bool active = i == 0;

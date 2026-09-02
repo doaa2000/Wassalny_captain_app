@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -21,11 +22,12 @@ class SupportPage extends StatelessWidget {
         bottom: false,
         child: BlocBuilder<SupportCubit, SupportState>(
           builder: (context, state) {
+            final l = AppLocalizations.of(context)!;
             final content = state.content;
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
               children: [
-                PageHeader(title: 'Support center', showBack: true, onBack: () => context.pop(), fontSize: 22),
+                PageHeader(title: l.supportCenter, showBack: true, onBack: () => context.pop(), fontSize: 22),
                 const SizedBox(height: 14),
                 if (content == null)
                   const Padding(padding: EdgeInsets.only(top: 80), child: LoadingView())
@@ -38,23 +40,23 @@ class SupportPage extends StatelessWidget {
                         child: _ContactCard(
                           icon: Icons.call_rounded,
                           iconColor: AppColors.primary,
-                          title: 'Call hotline',
+                          title: l.callHotline,
                           subtitle: content.hotline,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: _ContactCard(
                           icon: Icons.warning_amber_rounded,
                           iconColor: AppColors.danger,
-                          title: 'Report incident',
-                          subtitle: 'Safety & accidents',
+                          title: l.reportIncident,
+                          subtitle: l.safetyAccidents,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 22),
-                  Text('Frequently asked',
+                  Text(l.frequentlyAsked,
                       style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark)),
                   const SizedBox(height: 10),
                   AppCard(
@@ -86,6 +88,7 @@ class _LiveChatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -106,7 +109,7 @@ class _LiveChatCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Live chat support', style: AppTextStyles.cardTitle.copyWith(color: AppColors.white)),
+                Text(l.liveChatSupport, style: AppTextStyles.cardTitle.copyWith(color: AppColors.white)),
                 Text(replyTime, style: AppTextStyles.caption.copyWith(color: Colors.white.withValues(alpha: 0.85))),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/auth_bloc.dart';
@@ -25,6 +26,7 @@ class AuthListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
@@ -43,7 +45,7 @@ class AuthListener extends StatelessWidget {
               ..showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.danger,
-                  content: Text(state.errorMessage ?? 'Something went wrong.'),
+                  content: Text(state.errorMessage ?? l.somethingWentWrong),
                 ),
               );
           case AuthStatus.initial:

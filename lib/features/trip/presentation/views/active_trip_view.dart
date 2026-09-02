@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:wassalny_captain/l10n/app_localizations.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -18,6 +20,7 @@ class ActiveTripView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Stack(
       children: [
         const Positioned.fill(child: MapView(variant: MapVariant.tracking)),
@@ -40,7 +43,7 @@ class ActiveTripView extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('To destination',
+                            Text(l.toDestination,
                                 style: AppTextStyles.caption.copyWith(color: AppColors.textMutedDark)),
                             Text('11 min · 6.4 km',
                                 style: AppTextStyles.cardTitle.copyWith(color: AppColors.textPrimaryDark)),
@@ -65,7 +68,7 @@ class ActiveTripView extends StatelessWidget {
                   width: 54,
                   height: 54,
                   child: AppButton(
-                    label: 'SOS',
+                    label: l.sos,
                     variant: AppButtonVariant.danger,
                     height: 54,
                     onPressed: () {},
@@ -93,13 +96,13 @@ class ActiveTripView extends StatelessWidget {
                 const SizedBox(height: 14),
                 PassengerTile(
                   request: request,
-                  subtitle: 'Trip to ${request.dropoff}',
+                  subtitle: l.tripTo(request.dropoff),
                   avatarSize: 52,
                   trailing: const [SizedBox(width: 8), CircleActionButton(icon: Icons.call_rounded, filled: true)],
                 ),
                 const SizedBox(height: 16),
                 AppButton(
-                  label: 'Complete trip',
+                  label: l.completeTrip,
                   onPressed: () => context.read<TripBloc>().add(const TripCompletedRequested()),
                 ),
               ],

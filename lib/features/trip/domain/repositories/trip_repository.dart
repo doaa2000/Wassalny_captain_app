@@ -14,7 +14,11 @@ abstract interface class TripRepository {
   Stream<List<RideRequest>> watchNearbyRequests();
 
   /// Accept a request and start heading to the pickup.
-  Future<Either<Failure, RideRequest>> acceptRequest(String requestId);
+  /// [offeredFare] overrides the passenger's price when the captain counters.
+  Future<Either<Failure, RideRequest>> acceptRequest(
+    String requestId, {
+    double? offeredFare,
+  });
 
   /// Decline / let a request expire.
   Future<Either<Failure, Unit>> declineRequest(String requestId);

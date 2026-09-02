@@ -26,8 +26,11 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
-  Future<Either<Failure, RideRequest>> acceptRequest(String requestId) {
-    return _guard(() async => _remote.acceptRequest(requestId));
+  Future<Either<Failure, RideRequest>> acceptRequest(
+    String requestId, {
+    double? offeredFare,
+  }) {
+    return _guard(() async => _remote.acceptRequest(requestId, offeredFare: offeredFare));
   }
 
   @override

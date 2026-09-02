@@ -29,4 +29,5 @@ abstract final class AppRoutes {
   static const String wallet = '/wallet';
   static const String vehicle = '/vehicle';
   static const String support = '/support';
+  static const String editProfile = '/edit-profile';
 }

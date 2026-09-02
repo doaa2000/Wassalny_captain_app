@@ -17,6 +17,7 @@ class TripLocalDataSource implements TripRemoteDataSource {
       distance: '14.2 km',
       duration: '24 min',
       fare: 'EGP 96',
+      fareAmount: 96,
       pickupEtaMinutes: 4,
       pickupDistance: '2.1 km',
       passengerName: 'Nadia Saleh',
@@ -32,6 +33,7 @@ class TripLocalDataSource implements TripRemoteDataSource {
       distance: '18.6 km',
       duration: '32 min',
       fare: 'EGP 148',
+      fareAmount: 148,
       pickupEtaMinutes: 6,
       pickupDistance: '3.0 km',
       passengerName: 'Omar Adel',
@@ -49,8 +51,14 @@ class TripLocalDataSource implements TripRemoteDataSource {
       Stream<List<RideRequestModel>>.value(_seed);
 
   @override
-  Future<RideRequestModel> acceptRequest(String requestId) async {
-    return _seed.firstWhere((r) => r.id == requestId, orElse: () => _seed.first);
+  Future<RideRequestModel> acceptRequest(String requestId, {double? offeredFare}) async {
+    final RideRequestModel accepted =
+        _seed.firstWhere((r) => r.id == requestId, orElse: () => _seed.first);
+    if (offeredFare == null) return accepted;
+    return accepted.copyWith(
+      fare: 'EGP ${offeredFare.toStringAsFixed(0)}',
+      fareAmount: offeredFare,
+    );
   }
 
   @override

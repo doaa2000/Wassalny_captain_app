@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -37,7 +38,7 @@ class DashboardPage extends StatelessWidget {
           }
           if (state.status == DashboardStatus.failure) {
             return ErrorView(
-              message: state.errorMessage ?? 'Something went wrong.',
+              message: AppLocalizations.of(context)!.dashboardError,
               onRetry: () => context.read<DashboardBloc>().add(const DashboardStarted()),
             );
           }
@@ -128,7 +129,7 @@ class _StatusBar extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    online ? "You're online" : "You're offline",
+                    online ? AppLocalizations.of(context)!.dashboardOnline : AppLocalizations.of(context)!.dashboardOffline,
                     style: AppTextStyles.bodyStrong.copyWith(color: AppColors.textPrimaryDark),
                   ),
                 ),
@@ -178,9 +179,9 @@ class _DashboardSheet extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('Nearby requests', style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimaryDark)),
+            Text(AppLocalizations.of(context)!.nearbyRequests, style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimaryDark)),
             const Spacer(),
-            const StatusBadge(label: 'Live', color: AppColors.success, showDot: true),
+            StatusBadge(label: AppLocalizations.of(context)!.live, color: AppColors.success, showDot: true),
           ],
         ),
         const SizedBox(height: 12),
@@ -203,15 +204,15 @@ class _DashboardSheet extends StatelessWidget {
           child: const Icon(Icons.history_toggle_off_rounded, color: AppColors.textMutedDark, size: 30),
         ),
         const SizedBox(height: 14),
-        Text("You're offline", style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimaryDark)),
+        Text(AppLocalizations.of(context)!.dashboardOffline, style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textPrimaryDark)),
         const SizedBox(height: 5),
         Text(
-          'Go online to start receiving ride requests near you.',
+          AppLocalizations.of(context)!.dashboardOfflineSubtitle,
           textAlign: TextAlign.center,
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondaryDark),
         ),
         const SizedBox(height: 18),
-        AppButton(label: 'Go online', variant: AppButtonVariant.success, onPressed: onGoOnline),
+        AppButton(label: AppLocalizations.of(context)!.goOnline, variant: AppButtonVariant.success, onPressed: onGoOnline),
       ],
     );
   }

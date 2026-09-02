@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wassalny_captain/l10n/app_localizations.dart';
 
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -28,6 +29,7 @@ class _AccountRemovedPageState extends State<AccountRemovedPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
@@ -48,15 +50,14 @@ class _AccountRemovedPageState extends State<AccountRemovedPage> {
               ),
               const SizedBox(height: 26),
               Text(
-                'Account no longer active',
+                l.accountRemovedTitle,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.display
                     .copyWith(color: AppColors.textPrimaryDark, fontSize: 24),
               ),
               const SizedBox(height: 12),
               Text(
-                'Your captain account has been removed by the Wassalny team. '
-                'If you think this is a mistake, please contact support.',
+                l.accountRemovedBody,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.body
                     .copyWith(color: AppColors.textSecondaryDark, height: 1.5),
@@ -74,7 +75,7 @@ class _AccountRemovedPageState extends State<AccountRemovedPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text('Back to login',
+                  child: Text(l.backToLogin,
                       style: AppTextStyles.body
                           .copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
                 ),
