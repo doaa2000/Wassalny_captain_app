@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 import '../../../../core/constants/app_constants.dart';
@@ -13,14 +15,13 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   final SupabaseService _service;
 
   @override
-  Future<CaptainModel> login(
-      {required String phone, required String password}) async {
+  Future<CaptainModel> login({required String phone, required String password}) async {
     try {
       // Email-based auth: the `phone` argument carries the login identifier
       // (the captain's email). Phone+password needs a paid SMS provider, so we
       // use email until that's configured.
-      final sb.AuthResponse res = await _service.client.auth
-          .signInWithPassword(email: phone, password: password);
+      final sb.AuthResponse res =
+          await _service.client.auth.signInWithPassword(email: phone, password: password);
       return await _profileFor(res.user?.id, requireDriver: true);
     } on CaptainRemovedException {
       // Credentials were valid (a session was created) but the captain has no
@@ -35,26 +36,67 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> register({
- required String   name,
+  Future<CaptainModel> register({
     required String email,
     required String password,
+    required String name,
+    required String phone,
     required String nationalId,
-   required String  licenseNumber,
+    required String licenseNumber,
+    required String vehicleModel,
+    required int vehicleYear,
+    required String plateNumber,
+    required Map<String, Uint8List> documents,
   }) async {
     try {
-      // Phone-based onboarding: send the OTP so the app can continue to the
-      // verification screen. The captain's profile is auto-created by the
-      // `handle_new_user` trigger on first sign-in; the driver/vehicle row and
-      // KYC documents are completed afterwards (admin reviews + approves).
-      await _service.client.auth.signUp(
+      // Same auth mechanism as login (email + password) — a captain who
+      // registers can always log back in afterwards. `handle_new_user`
+      // auto-creates the `profiles` row from this signUp.
+      final sb.AuthResponse res = await _service.client.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'full_name': name,
-          'role': 'driver',
-        },
+        data: {'full_name': name, 'role': 'driver', 'phone': phone},
       );
+      final String? uid = res.user?.id;
+      if (uid == null) {
+        throw const AuthException('Registration failed — no session was created.');
+      }
+
+      // The vehicle/KYC row — starts as `approval_status: pending` by the
+      // table's own default; an admin reviews it afterwards.
+      await _service.client.from(AppConstants.tableDrivers).insert({
+        'profile_id': uid,
+        'national_id': nationalId,
+        'license_number': licenseNumber,
+        'vehicle_model': vehicleModel,
+        'vehicle_year': vehicleYear,
+        'plate_number': plateNumber,
+        'vehicle_type': 'economy',
+      });
+
+      // Upload each KYC document and record it. The bucket is private
+      // (owner + admin only), so we store the storage *path*, not a public
+      // URL — reading it back requires a signed URL or an authenticated
+      // request, matching the bucket's RLS.
+      for (final MapEntry<String, Uint8List> doc in documents.entries) {
+        final String path = '$uid/${doc.key}.jpg';
+        await _service.client.storage.from(AppConstants.storageDriverDocuments).uploadBinary(
+              path,
+              doc.value,
+              fileOptions: const sb.FileOptions(upsert: true, contentType: 'image/jpeg'),
+            );
+        await _service.client.from(AppConstants.tableDriverDocuments).insert({
+          'driver_id': uid,
+          'document_type': doc.key,
+          'document_url': path,
+        });
+      }
+
+      return await _profileFor(uid, requireDriver: false);
+    } on CaptainRemovedException {
+      rethrow;
+    } on sb.AuthException catch (e) {
+      throw AuthException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -70,8 +112,7 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
   }
 
   @override
-  Future<CaptainModel> verifyOtp(
-      {required String phone, required String code}) async {
+  Future<CaptainModel> verifyOtp({required String phone, required String code}) async {
     try {
       final sb.AuthResponse res = await _service.client.auth.verifyOTP(
         phone: phone,
@@ -119,7 +160,7 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
           .maybeSingle();
       final Map<String, dynamic>? driver = await _service.client
           .from(AppConstants.tableDrivers)
-          .select('rating')
+          .select('rating, approval_status, rejection_reason')
           .eq('profile_id', user.id)
           .maybeSingle();
       // The auth account is fine, but the driver record is gone → an admin
@@ -130,6 +171,8 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
         'name': profile?['full_name'],
         'phone': profile?['phone'],
         'rating': driver['rating']?.toString(),
+        'approval_status': driver['approval_status'],
+        'rejection_reason': driver['rejection_reason'],
       });
     } on CaptainRemovedException {
       rethrow;
@@ -146,8 +189,9 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
 
   /// Builds the captain profile. When [requireDriver] is true (login), a missing
   /// driver record means the captain was removed → throws so the app blocks
-  /// them. Registration (verifyOtp) keeps it false, since a brand-new captain
-  /// has no driver record yet.
+  /// them. [register] passes false since it inserts the driver row itself
+  /// moments before calling this, but a transient read race is still
+  /// theoretically possible.
   Future<CaptainModel> _profileFor(String? userId,
       {bool requireDriver = false}) async {
     if (userId == null) throw const AuthException('No active session.');
@@ -158,7 +202,7 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
         .single();
     final Map<String, dynamic>? driver = await _service.client
         .from(AppConstants.tableDrivers)
-        .select('rating')
+        .select('rating, approval_status, rejection_reason')
         .eq('profile_id', userId)
         .maybeSingle();
     if (requireDriver && driver == null) throw const CaptainRemovedException();
@@ -167,6 +211,8 @@ class AuthSupabaseDataSource implements AuthRemoteDataSource {
       'name': profile['full_name'],
       'phone': profile['phone'],
       'rating': driver?['rating']?.toString(),
+      'approval_status': driver?['approval_status'],
+      'rejection_reason': driver?['rejection_reason'],
     });
   }
 }

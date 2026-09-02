@@ -9,6 +9,8 @@ class Captain extends Equatable {
     required this.initials,
     this.rating = '0.0',
     this.memberSince,
+    this.approvalStatus = 'pending',
+    this.rejectionReason,
   });
 
   final String id;
@@ -18,6 +20,12 @@ class Captain extends Equatable {
   final String rating;
   final String? memberSince;
 
+  /// One of 'pending' | 'approved' | 'rejected' | 'suspended' (server enum
+  /// `public.approval_status`) — gates whether the captain can reach the
+  /// dashboard or sees a pending/rejected screen instead.
+  final String approvalStatus;
+  final String? rejectionReason;
+
   @override
-  List<Object?> get props => [id, name, phone];
+  List<Object?> get props => [id, name, phone, approvalStatus];
 }

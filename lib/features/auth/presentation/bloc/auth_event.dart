@@ -18,21 +18,42 @@ class AuthLoginSubmitted extends AuthEvent {
 
 class AuthRegisterSubmitted extends AuthEvent {
   const AuthRegisterSubmitted({
-    required this.name,
-    required this.nationalId,
-    required this.licenseNumber,
     required this.email,
     required this.password,
+    required this.name,
+    required this.phone,
+    required this.nationalId,
+    required this.licenseNumber,
+    required this.vehicleModel,
+    required this.vehicleYear,
+    required this.plateNumber,
+    required this.documents,
   });
 
+  final String email;
+  final String password;
   final String name;
+  final String phone;
   final String nationalId;
   final String licenseNumber;
-final String email;
-  final String password;
+  final String vehicleModel;
+  final int vehicleYear;
+  final String plateNumber;
+  final Map<String, Uint8List> documents;
 
   @override
-  List<Object?> get props => [name, nationalId, licenseNumber, email, password];
+  List<Object?> get props => [
+        email,
+        password,
+        name,
+        phone,
+        nationalId,
+        licenseNumber,
+        vehicleModel,
+        vehicleYear,
+        plateNumber,
+        documents,
+      ];
 }
 
 class AuthOtpSubmitted extends AuthEvent {

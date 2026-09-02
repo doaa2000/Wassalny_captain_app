@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: AuthListener(
-        onAuthenticated: () => context.go(AppRoutes.dashboard),
+        onAuthenticated: (captain) => routeAfterAuth(context, captain),
         child: SafeArea(
           child: ResponsiveCenter(
             child: SingleChildScrollView(

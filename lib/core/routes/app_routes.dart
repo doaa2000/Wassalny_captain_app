@@ -10,6 +10,8 @@ abstract final class AppRoutes {
   static const String otp = '/otp';
   static const String forgotPassword = '/forgot-password';
   static const String accountRemoved = '/account-removed';
+  static const String pendingApproval = '/pending-approval';
+  static const String applicationRejected = '/application-rejected';
 
   // Main shell tabs
   static const String dashboard = '/dashboard';

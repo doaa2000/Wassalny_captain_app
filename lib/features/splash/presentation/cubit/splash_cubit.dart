@@ -22,8 +22,14 @@ class SplashCubit extends Cubit<SplashState> {
       (failure) => failure is AccountRemovedFailure
           ? const SplashRemoved()
           : const SplashUnauthenticated(),
-      (captain) =>
-          captain != null ? const SplashAuthenticated() : const SplashUnauthenticated(),
+      (captain) {
+        if (captain == null) return const SplashUnauthenticated();
+        return switch (captain.approvalStatus) {
+          'approved' => const SplashAuthenticated(),
+          'pending' => const SplashPendingApproval(),
+          _ => SplashRejected(captain.rejectionReason),
+        };
+      },
     ));
   }
 }

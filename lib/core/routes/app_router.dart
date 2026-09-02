@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/account_removed_page.dart';
+import '../../features/auth/presentation/pages/application_rejected_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
+import '../../features/auth/presentation/pages/pending_approval_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
@@ -54,9 +56,17 @@ abstract final class AppRouter {
       // ---- Auth (AuthBloc is provided globally above the router) ----
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginPage()),
       GoRoute(path: AppRoutes.signup, builder: (_, __) => const SignupPage()),
-      GoRoute(path: AppRoutes.otp, builder: (_, __) => const OtpPage()),
+      GoRoute(
+        path: AppRoutes.otp,
+        builder: (_, state) => OtpPage(phone: (state.extra as String?) ?? ''),
+      ),
       GoRoute(path: AppRoutes.forgotPassword, builder: (_, __) => const ForgotPasswordPage()),
       GoRoute(path: AppRoutes.accountRemoved, builder: (_, __) => const AccountRemovedPage()),
+      GoRoute(path: AppRoutes.pendingApproval, builder: (_, __) => const PendingApprovalPage()),
+      GoRoute(
+        path: AppRoutes.applicationRejected,
+        builder: (_, state) => ApplicationRejectedPage(reason: state.extra as String?),
+      ),
 
       // ---- Main tabs (persistent bottom nav) ----
       StatefulShellRoute.indexedStack(

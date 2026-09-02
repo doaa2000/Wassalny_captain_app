@@ -45,6 +45,10 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
             context.go(AppRoutes.dashboard);
           } else if (state is SplashRemoved) {
             context.go(AppRoutes.accountRemoved);
+          } else if (state is SplashPendingApproval) {
+            context.go(AppRoutes.pendingApproval);
+          } else if (state is SplashRejected) {
+            context.go(AppRoutes.applicationRejected, extra: state.reason);
           } else if (state is SplashUnauthenticated) {
             context.go(AppRoutes.login);
           }
