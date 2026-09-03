@@ -28,6 +28,8 @@
   "@pickup": { "description": "Map marker for trip pickup location" },
   "@dropoff": { "description": "Map marker for trip drop-off location" },
 
+  "driverLocation": "Your location",
+
   "splashWelcome": "Wassalny",
   "splashCaptain": "Captain",
   "splashTapToContinue": "Tap to continue",

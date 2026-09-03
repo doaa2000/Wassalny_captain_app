@@ -25,6 +25,8 @@
   "pickup": "نقطة الاستلام",
   "dropoff": "نقطة التوصيل",
 
+  "driverLocation": "موقعك",
+
   "splashWelcome": "وصلني",
   "splashCaptain": "كابتن",
   "splashTapToContinue": "اضغط للمتابعة",

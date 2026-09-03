@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -36,14 +37,30 @@ class _MapViewState extends State<MapView> {
 
   GoogleMapController? _controller;
 
+  /// The captain's (driver's) live position, resolved once and on map create.
+  LatLng? _driverLocation;
+  bool _locationRequested = false;
+
   LatLng get _pickup => widget.pickup ?? _defaultPickup;
   LatLng get _dropoff => widget.dropoff ?? _defaultDropoff;
   bool get _showRoute => widget.variant != MapVariant.idle;
 
   Set<Marker> _markers(BuildContext context) {
-    if (!_showRoute) return const {};
     final l = AppLocalizations.of(context);
-    return {
+    final Set<Marker> markers = {};
+
+    // The captain's live location — the blue pin marks the driver (this device).
+    if (_driverLocation != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('driver'),
+        position: _driverLocation!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        infoWindow: InfoWindow(title: l?.driverLocation ?? 'You'),
+      ));
+    }
+
+    if (!_showRoute) return markers;
+    markers.addAll([
       Marker(
         markerId: const MarkerId('pickup'),
         position: _pickup,
@@ -55,7 +72,8 @@ class _MapViewState extends State<MapView> {
         position: _dropoff,
         infoWindow: InfoWindow(title: l?.dropoff ?? 'Drop-off'),
       ),
-    };
+    ]);
+    return markers;
   }
 
   Set<Polyline> _polylines() {
@@ -78,8 +96,40 @@ class _MapViewState extends State<MapView> {
       ? CameraPosition(target: _pickup, zoom: 13.5)
       : const CameraPosition(target: _cairoCenter, zoom: 13);
 
+  /// Resolves the captain's current position (once) via [Geolocator], marks it
+  /// on the map, and — on the dashboard (idle) — re-centers the camera on them.
+  Future<void> _locateDriver() async {
+    if (_locationRequested) return;
+    _locationRequested = true;
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) return;
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      ).timeout(const Duration(seconds: 12));
+      if (!mounted) return;
+      final LatLng driverPosition = LatLng(position.latitude, position.longitude);
+      setState(() => _driverLocation = driverPosition);
+      if (widget.variant == MapVariant.idle) {
+        await _controller
+            ?.animateCamera(CameraUpdate.newLatLngZoom(driverPosition, 15));
+        }
+    } catch (_) {
+      // Location unavailable / denied — the map simply renders without thee driver pin.
+
+  }
+  }
+
   Future<void> _onMapCreated(GoogleMapController controller) async {
     _controller = controller;
+    _locateDriver();
     if (_showRoute) {
       final bounds = LatLngBounds(
         southwest: LatLng(
@@ -113,6 +163,7 @@ class _MapViewState extends State<MapView> {
       style: captainMapStyle,
       markers: _markers(context),
       polylines: _polylines(),
+      myLocationEnabled: true,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       compassEnabled: false,

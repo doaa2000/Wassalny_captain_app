@@ -70,6 +70,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dropoff => 'نقطة التوصيل';
 
   @override
+  String get driverLocation => 'موقعك';
+
+  @override
   String get splashWelcome => 'وصلني';
 
   @override

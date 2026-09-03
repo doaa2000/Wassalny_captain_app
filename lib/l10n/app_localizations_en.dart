@@ -70,6 +70,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropoff => 'Drop-off';
 
   @override
+  String get driverLocation => 'Your location';
+
+  @override
   String get splashWelcome => 'Wassalny';
 
   @override
