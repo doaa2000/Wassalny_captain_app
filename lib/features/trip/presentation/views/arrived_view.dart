@@ -43,9 +43,12 @@ class ArrivedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return Stack(
-      children: [
-        const Positioned.fill(child: MapView(variant: MapVariant.route)),
+    return MapScaffold(
+      variant: MapVariant.route,
+      builder: (context, map, myLocationButton) {
+        return Stack(
+          children: [
+            Positioned.fill(child: map),
         SafeArea(
           bottom: false,
           child: Padding(
@@ -69,7 +72,9 @@ class ArrivedView extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: MapSheet(
+          child: MapSheetStack(
+            myLocationButton: myLocationButton,
+            sheet: MapSheet(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -116,9 +121,12 @@ class ArrivedView extends StatelessWidget {
                 ),
               ],
             ),
+            ),
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

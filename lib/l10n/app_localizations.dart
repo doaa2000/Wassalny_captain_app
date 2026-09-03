@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'Your location'**
   String get driverLocation;
 
+  /// No description provided for @myLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'My location'**
+  String get myLocation;
+
   /// No description provided for @splashWelcome.
   ///
   /// In en, this message translates to:

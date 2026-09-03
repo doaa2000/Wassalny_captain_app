@@ -43,38 +43,46 @@ class DashboardPage extends StatelessWidget {
             );
           }
 
-          return Stack(
-            children: [
-              const Positioned.fill(child: MapView(variant: MapVariant.idle)),
-              if (!state.online)
-                Positioned.fill(child: Container(color: AppColors.overlay)),
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 4, 18, 0),
-                  child: Column(
-                    children: [
-                      _StatusBar(
-                        online: state.online,
-                        onToggle: () => context.read<DashboardBloc>().add(const DashboardOnlineToggled()),
-                        onAvatarTap: () => context.go(AppRoutes.profile),
+          return MapScaffold(
+            variant: MapVariant.idle,
+            builder: (context, map, myLocationButton) {
+              return Stack(
+                children: [
+                  Positioned.fill(child: map),
+                  if (!state.online)
+                    Positioned.fill(child: Container(color: AppColors.overlay)),
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 4, 18, 0),
+                      child: Column(
+                        children: [
+                          _StatusBar(
+                            online: state.online,
+                            onToggle: () => context.read<DashboardBloc>().add(const DashboardOnlineToggled()),
+                            onAvatarTap: () => context.go(AppRoutes.profile),
+                          ),
+                          const SizedBox(height: 12),
+                          if (state.summary != null) DashboardStatPills(summary: state.summary!),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      if (state.summary != null) DashboardStatPills(summary: state.summary!),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: _DashboardSheet(
-                  online: state.online,
-                  requests: state.requests,
-                  onRequestTap: (r) => _openRequest(context, r),
-                  onGoOnline: () => context.read<DashboardBloc>().add(const DashboardOnlineToggled()),
-                ),
-              ),
-            ],
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: MapSheetStack(
+                      myLocationButton: myLocationButton,
+                      sheet: _DashboardSheet(
+                        online: state.online,
+                        requests: state.requests,
+                        onRequestTap: (r) => _openRequest(context, r),
+                        onGoOnline: () => context.read<DashboardBloc>().add(const DashboardOnlineToggled()),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

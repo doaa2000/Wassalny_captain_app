@@ -29,6 +29,7 @@
   "@dropoff": { "description": "Map marker for trip drop-off location" },
 
   "driverLocation": "Your location",
+  "myLocation": "My location",
 
   "splashWelcome": "Wassalny",
   "splashCaptain": "Captain",

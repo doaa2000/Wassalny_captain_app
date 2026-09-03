@@ -73,6 +73,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverLocation => 'Your location';
 
   @override
+  String get myLocation => 'My location';
+
+  @override
   String get splashWelcome => 'Wassalny';
 
   @override

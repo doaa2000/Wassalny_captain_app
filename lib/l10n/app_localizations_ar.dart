@@ -73,6 +73,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverLocation => 'موقعك';
 
   @override
+  String get myLocation => 'موقعي';
+
+  @override
   String get splashWelcome => 'وصلني';
 
   @override

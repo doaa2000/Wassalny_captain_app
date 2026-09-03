@@ -27,9 +27,12 @@ class IncomingRequestView extends StatelessWidget {
     final bool keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Stack(
-          children: [
-            const Positioned.fill(child: MapView(variant: MapVariant.route)),
+        return MapScaffold(
+          variant: MapVariant.route,
+          builder: (context, map, myLocationButton) {
+            return Stack(
+              children: [
+                Positioned.fill(child: map),
             const Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -58,11 +61,16 @@ class IncomingRequestView extends StatelessWidget {
                 constraints: BoxConstraints(maxHeight: constraints.maxHeight),
                 child: SingleChildScrollView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  child: _RequestSheet(request: request),
+                  child: MapSheetStack(
+                    myLocationButton: myLocationButton,
+                    sheet: _RequestSheet(request: request),
+                  ),
                 ),
               ),
             ),
           ],
+        );
+          },
         );
       },
     );

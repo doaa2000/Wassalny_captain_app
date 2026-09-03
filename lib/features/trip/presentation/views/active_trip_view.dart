@@ -43,9 +43,12 @@ class ActiveTripView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    return Stack(
-      children: [
-        const Positioned.fill(child: MapView(variant: MapVariant.tracking)),
+    return MapScaffold(
+      variant: MapVariant.tracking,
+      builder: (context, map, myLocationButton) {
+        return Stack(
+          children: [
+            Positioned.fill(child: map),
         SafeArea(
           bottom: false,
           child: Padding(
@@ -102,7 +105,9 @@ class ActiveTripView extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: MapSheet(
+          child: MapSheetStack(
+            myLocationButton: myLocationButton,
+            sheet: MapSheet(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -141,9 +146,12 @@ class ActiveTripView extends StatelessWidget {
                 ),
               ],
             ),
+            ),
           ),
         ),
       ],
+        );
+      },
     );
   }
 
